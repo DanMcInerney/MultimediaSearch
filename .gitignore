@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Agent sessions and worktrees
+.claude/
+
+# Research and development notes: kept locally, not published
+research/
+notes/

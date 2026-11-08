@@ -1,0 +1,3281 @@
+{
+ "run": {
+  "name": "20261103-0257-egolife-s1",
+  "seed": 1,
+  "days": 3,
+  "commit": "c7f62e9+dirty",
+  "timeout_s": 900.0,
+  "decode_s": 0.024,
+  "pools": {
+   "video": 143,
+   "speech": 95,
+   "dropped": {
+    "its time is a range or a list in one string": 7,
+    "a target is outside the clips (a gap) or after the horizon": 1,
+    "its query is after the last day": 254
+   }
+  },
+  "video": [
+   10,
+   10,
+   10,
+   10
+  ],
+  "speech": 10,
+  "categories": {
+   "EventRecall": 11,
+   "EntityLog": 13,
+   "RelationMap": 12,
+   "TaskMaster": 4,
+   "HabitInsight": 10
+  },
+  "horizon": {
+   "median_s": 12.996779918670654,
+   "max_s": 28.956779956817627,
+   "past_30s": 0,
+   "audited": 0,
+   "after_horizon": 0,
+   "asks": 0,
+   "asks_past_horizon": 0
+  }
+ },
+ "agents": {
+  "codex": {
+   "d1-3B": {
+    "questions": 50,
+    "paired": 50,
+    "video": {
+     "n": 40,
+     "arms": {
+      "blind": {
+       "correct": 16,
+       "accuracy": 0.4,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 4.95,
+       "median_calls": 0.0,
+       "seconds": 235.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 16773,
+        "output": 2053,
+        "cache_read": 0,
+        "cache_write": 0
+       },
+       "tokens_mean": 470.65,
+       "tokens_all": 18826,
+       "tokens_n": 40,
+       "cost_usd": null,
+       "unparsed": 0,
+       "wilson": [
+        0.2634832559197014,
+        0.5540410645719913
+       ]
+      },
+      "files": {
+       "correct": 36,
+       "accuracy": 0.9,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 30.5,
+       "median_calls": 6.0,
+       "seconds": 1916.3999999999999,
+       "timeouts": 0,
+       "tokens": {
+        "input": 4377175,
+        "output": 43253,
+        "cache_read": 3265536,
+        "cache_write": 0
+       },
+       "tokens_mean": 110510.7,
+       "tokens_all": 4420428,
+       "tokens_n": 40,
+       "cost_usd": null,
+       "unparsed": 0,
+       "wilson": [
+        0.7694822464406407,
+        0.9604204715925885
+       ]
+      },
+      "mm": {
+       "correct": 34,
+       "accuracy": 0.85,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 25.799999999999997,
+       "median_calls": 6.0,
+       "seconds": 2605.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 8281933,
+        "output": 19607,
+        "cache_read": 6720768,
+        "cache_write": 0
+       },
+       "tokens_mean": 207538.5,
+       "tokens_all": 8301540,
+       "tokens_n": 40,
+       "cost_usd": null,
+       "unparsed": 0,
+       "wilson": [
+        0.7092767550401498,
+        0.9293881232389256
+       ]
+      }
+     },
+     "mm_files": {
+      "n": 40,
+      "base": {
+       "correct": 36,
+       "accuracy": 0.9,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 30.5,
+       "median_calls": 6.0,
+       "seconds": 1916.3999999999999,
+       "timeouts": 0,
+       "tokens": {
+        "input": 4377175,
+        "output": 43253,
+        "cache_read": 3265536,
+        "cache_write": 0
+       },
+       "tokens_mean": 110510.7,
+       "tokens_all": 4420428,
+       "tokens_n": 40,
+       "cost_usd": null
+      },
+      "other": {
+       "correct": 34,
+       "accuracy": 0.85,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 25.799999999999997,
+       "median_calls": 6.0,
+       "seconds": 2605.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 8281933,
+        "output": 19607,
+        "cache_read": 6720768,
+        "cache_write": 0
+       },
+       "tokens_mean": 207538.5,
+       "tokens_all": 8301540,
+       "tokens_n": 40,
+       "cost_usd": null
+      },
+      "diff": -0.05,
+      "ci": [
+       -0.21073226028674358,
+       0.11198510792133845
+      ],
+      "b": 4,
+      "c": 6,
+      "p": 0.75390625
+     },
+     "files_blind": {
+      "n": 40,
+      "base": {
+       "correct": 16,
+       "accuracy": 0.4,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 4.95,
+       "median_calls": 0.0,
+       "seconds": 235.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 16773,
+        "output": 2053,
+        "cache_read": 0,
+        "cache_write": 0
+       },
+       "tokens_mean": 470.65,
+       "tokens_all": 18826,
+       "tokens_n": 40,
+       "cost_usd": null
+      },
+      "other": {
+       "correct": 36,
+       "accuracy": 0.9,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 30.5,
+       "median_calls": 6.0,
+       "seconds": 1916.3999999999999,
+       "timeouts": 0,
+       "tokens": {
+        "input": 4377175,
+        "output": 43253,
+        "cache_read": 3265536,
+        "cache_write": 0
+       },
+       "tokens_mean": 110510.7,
+       "tokens_all": 4420428,
+       "tokens_n": 40,
+       "cost_usd": null
+      },
+      "diff": 0.5,
+      "ci": [
+       0.2914346858174751,
+       0.6530030087692649
+      ],
+      "b": 22,
+      "c": 2,
+      "p": 3.5881996154785156e-05
+     },
+     "mm_blind": {
+      "n": 40,
+      "base": {
+       "correct": 16,
+       "accuracy": 0.4,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 4.95,
+       "median_calls": 0.0,
+       "seconds": 235.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 16773,
+        "output": 2053,
+        "cache_read": 0,
+        "cache_write": 0
+       },
+       "tokens_mean": 470.65,
+       "tokens_all": 18826,
+       "tokens_n": 40,
+       "cost_usd": null
+      },
+      "other": {
+       "correct": 34,
+       "accuracy": 0.85,
+       "n": 40,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 40,
+       "abstained": 0,
+       "median_s": 25.799999999999997,
+       "median_calls": 6.0,
+       "seconds": 2605.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 8281933,
+        "output": 19607,
+        "cache_read": 6720768,
+        "cache_write": 0
+       },
+       "tokens_mean": 207538.5,
+       "tokens_all": 8301540,
+       "tokens_n": 40,
+       "cost_usd": null
+      },
+      "diff": 0.45,
+      "ci": [
+       0.24135752770228583,
+       0.6079218019327433
+      ],
+      "b": 20,
+      "c": 2,
+      "p": 0.00012111663818359375
+     }
+    },
+    "speech": {
+     "n": 10,
+     "arms": {
+      "blind": {
+       "correct": 1,
+       "accuracy": 0.1,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 5.5,
+       "median_calls": 0.0,
+       "seconds": 56.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 4188,
+        "output": 491,
+        "cache_read": 0,
+        "cache_write": 0
+       },
+       "tokens_mean": 467.9,
+       "tokens_all": 4679,
+       "tokens_n": 10,
+       "cost_usd": null,
+       "unparsed": 0,
+       "wilson": [
+        0.017876212896073995,
+        0.4041500295247722
+       ]
+      },
+      "files": {
+       "correct": 9,
+       "accuracy": 0.9,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 15.4,
+       "median_calls": 3.0,
+       "seconds": 159.4,
+       "timeouts": 0,
+       "tokens": {
+        "input": 340583,
+        "output": 4164,
+        "cache_read": 162944,
+        "cache_write": 0
+       },
+       "tokens_mean": 34474.7,
+       "tokens_all": 344747,
+       "tokens_n": 10,
+       "cost_usd": null,
+       "unparsed": 0,
+       "wilson": [
+        0.5958499704752279,
+        0.982123787103926
+       ]
+      },
+      "mm": {
+       "correct": 8,
+       "accuracy": 0.8,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 11.55,
+       "median_calls": 3.0,
+       "seconds": 136.9,
+       "timeouts": 0,
+       "tokens": {
+        "input": 832643,
+        "output": 2428,
+        "cache_read": 616832,
+        "cache_write": 0
+       },
+       "tokens_mean": 83507.1,
+       "tokens_all": 835071,
+       "tokens_n": 10,
+       "cost_usd": null,
+       "unparsed": 0,
+       "wilson": [
+        0.4901624691221323,
+        0.9433178490622331
+       ]
+      }
+     },
+     "mm_files": {
+      "n": 10,
+      "base": {
+       "correct": 9,
+       "accuracy": 0.9,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 15.4,
+       "median_calls": 3.0,
+       "seconds": 159.4,
+       "timeouts": 0,
+       "tokens": {
+        "input": 340583,
+        "output": 4164,
+        "cache_read": 162944,
+        "cache_write": 0
+       },
+       "tokens_mean": 34474.7,
+       "tokens_all": 344747,
+       "tokens_n": 10,
+       "cost_usd": null
+      },
+      "other": {
+       "correct": 8,
+       "accuracy": 0.8,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 11.55,
+       "median_calls": 3.0,
+       "seconds": 136.9,
+       "timeouts": 0,
+       "tokens": {
+        "input": 832643,
+        "output": 2428,
+        "cache_read": 616832,
+        "cache_write": 0
+       },
+       "tokens_mean": 83507.1,
+       "tokens_all": 835071,
+       "tokens_n": 10,
+       "cost_usd": null
+      },
+      "diff": -0.1,
+      "ci": null,
+      "b": 0,
+      "c": 1,
+      "p": 1.0
+     },
+     "files_blind": {
+      "n": 10,
+      "base": {
+       "correct": 1,
+       "accuracy": 0.1,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 5.5,
+       "median_calls": 0.0,
+       "seconds": 56.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 4188,
+        "output": 491,
+        "cache_read": 0,
+        "cache_write": 0
+       },
+       "tokens_mean": 467.9,
+       "tokens_all": 4679,
+       "tokens_n": 10,
+       "cost_usd": null
+      },
+      "other": {
+       "correct": 9,
+       "accuracy": 0.9,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 15.4,
+       "median_calls": 3.0,
+       "seconds": 159.4,
+       "timeouts": 0,
+       "tokens": {
+        "input": 340583,
+        "output": 4164,
+        "cache_read": 162944,
+        "cache_write": 0
+       },
+       "tokens_mean": 34474.7,
+       "tokens_all": 344747,
+       "tokens_n": 10,
+       "cost_usd": null
+      },
+      "diff": 0.8,
+      "ci": null,
+      "b": 8,
+      "c": 0,
+      "p": 0.0078125
+     },
+     "mm_blind": {
+      "n": 10,
+      "base": {
+       "correct": 1,
+       "accuracy": 0.1,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 5.5,
+       "median_calls": 0.0,
+       "seconds": 56.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 4188,
+        "output": 491,
+        "cache_read": 0,
+        "cache_write": 0
+       },
+       "tokens_mean": 467.9,
+       "tokens_all": 4679,
+       "tokens_n": 10,
+       "cost_usd": null
+      },
+      "other": {
+       "correct": 8,
+       "accuracy": 0.8,
+       "n": 10,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 10,
+       "abstained": 0,
+       "median_s": 11.55,
+       "median_calls": 3.0,
+       "seconds": 136.9,
+       "timeouts": 0,
+       "tokens": {
+        "input": 832643,
+        "output": 2428,
+        "cache_read": 616832,
+        "cache_write": 0
+       },
+       "tokens_mean": 83507.1,
+       "tokens_all": 835071,
+       "tokens_n": 10,
+       "cost_usd": null
+      },
+      "diff": 0.7,
+      "ci": null,
+      "b": 7,
+      "c": 0,
+      "p": 0.015625
+     }
+    },
+    "ages": {
+     "0-2h": {
+      "n": 10,
+      "arms": {
+       "blind": {
+        "correct": 4,
+        "accuracy": 0.4,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 4.85,
+        "median_calls": 0.0,
+        "seconds": 61.7,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4168,
+         "output": 460,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 462.8,
+        "tokens_all": 4628,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.1681803285264069,
+         0.6873262320788047
+        ]
+       },
+       "files": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 28.1,
+        "median_calls": 6.0,
+        "seconds": 355.09999999999997,
+        "timeouts": 0,
+        "tokens": {
+         "input": 627390,
+         "output": 9549,
+         "cache_read": 405376,
+         "cache_write": 0
+        },
+        "tokens_mean": 63693.9,
+        "tokens_all": 636939,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.5958499704752279,
+         0.982123787103926
+        ]
+       },
+       "mm": {
+        "correct": 8,
+        "accuracy": 0.8,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 27.5,
+        "median_calls": 4.5,
+        "seconds": 412.9,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1504687,
+         "output": 3943,
+         "cache_read": 1139968,
+         "cache_write": 0
+        },
+        "tokens_mean": 150863.0,
+        "tokens_all": 1508630,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.4901624691221323,
+         0.9433178490622331
+        ]
+       }
+      },
+      "mm_files": {
+       "n": 10,
+       "base": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 28.1,
+        "median_calls": 6.0,
+        "seconds": 355.09999999999997,
+        "timeouts": 0,
+        "tokens": {
+         "input": 627390,
+         "output": 9549,
+         "cache_read": 405376,
+         "cache_write": 0
+        },
+        "tokens_mean": 63693.9,
+        "tokens_all": 636939,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 8,
+        "accuracy": 0.8,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 27.5,
+        "median_calls": 4.5,
+        "seconds": 412.9,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1504687,
+         "output": 3943,
+         "cache_read": 1139968,
+         "cache_write": 0
+        },
+        "tokens_mean": 150863.0,
+        "tokens_all": 1508630,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": -0.1,
+       "ci": null,
+       "b": 1,
+       "c": 2,
+       "p": 1.0
+      },
+      "files_blind": {
+       "n": 10,
+       "base": {
+        "correct": 4,
+        "accuracy": 0.4,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 4.85,
+        "median_calls": 0.0,
+        "seconds": 61.7,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4168,
+         "output": 460,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 462.8,
+        "tokens_all": 4628,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 28.1,
+        "median_calls": 6.0,
+        "seconds": 355.09999999999997,
+        "timeouts": 0,
+        "tokens": {
+         "input": 627390,
+         "output": 9549,
+         "cache_read": 405376,
+         "cache_write": 0
+        },
+        "tokens_mean": 63693.9,
+        "tokens_all": 636939,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.5,
+       "ci": null,
+       "b": 5,
+       "c": 0,
+       "p": 0.0625
+      },
+      "mm_blind": {
+       "n": 10,
+       "base": {
+        "correct": 4,
+        "accuracy": 0.4,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 4.85,
+        "median_calls": 0.0,
+        "seconds": 61.7,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4168,
+         "output": 460,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 462.8,
+        "tokens_all": 4628,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 8,
+        "accuracy": 0.8,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 27.5,
+        "median_calls": 4.5,
+        "seconds": 412.9,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1504687,
+         "output": 3943,
+         "cache_read": 1139968,
+         "cache_write": 0
+        },
+        "tokens_mean": 150863.0,
+        "tokens_all": 1508630,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.4,
+       "ci": null,
+       "b": 5,
+       "c": 1,
+       "p": 0.21875
+      }
+     },
+     "2-6h": {
+      "n": 10,
+      "arms": {
+       "blind": {
+        "correct": 3,
+        "accuracy": 0.3,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 4.5,
+        "median_calls": 0.0,
+        "seconds": 48.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4207,
+         "output": 495,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 470.2,
+        "tokens_all": 4702,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.10779126655639398,
+         0.6032218546540291
+        ]
+       },
+       "files": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 45.05,
+        "median_calls": 8.0,
+        "seconds": 592.4,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1543332,
+         "output": 12404,
+         "cache_read": 1258880,
+         "cache_write": 0
+        },
+        "tokens_mean": 155573.6,
+        "tokens_all": 1555736,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.5958499704752279,
+         0.982123787103926
+        ]
+       },
+       "mm": {
+        "correct": 10,
+        "accuracy": 1.0,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 46.550000000000004,
+        "median_calls": 7.5,
+        "seconds": 659.6,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1915905,
+         "output": 4946,
+         "cache_read": 1489152,
+         "cache_write": 0
+        },
+        "tokens_mean": 192085.1,
+        "tokens_all": 1920851,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.7224671969739421,
+         0.9999999999999999
+        ]
+       }
+      },
+      "mm_files": {
+       "n": 10,
+       "base": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 45.05,
+        "median_calls": 8.0,
+        "seconds": 592.4,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1543332,
+         "output": 12404,
+         "cache_read": 1258880,
+         "cache_write": 0
+        },
+        "tokens_mean": 155573.6,
+        "tokens_all": 1555736,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 10,
+        "accuracy": 1.0,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 46.550000000000004,
+        "median_calls": 7.5,
+        "seconds": 659.6,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1915905,
+         "output": 4946,
+         "cache_read": 1489152,
+         "cache_write": 0
+        },
+        "tokens_mean": 192085.1,
+        "tokens_all": 1920851,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.1,
+       "ci": null,
+       "b": 1,
+       "c": 0,
+       "p": 1.0
+      },
+      "files_blind": {
+       "n": 10,
+       "base": {
+        "correct": 3,
+        "accuracy": 0.3,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 4.5,
+        "median_calls": 0.0,
+        "seconds": 48.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4207,
+         "output": 495,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 470.2,
+        "tokens_all": 4702,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 45.05,
+        "median_calls": 8.0,
+        "seconds": 592.4,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1543332,
+         "output": 12404,
+         "cache_read": 1258880,
+         "cache_write": 0
+        },
+        "tokens_mean": 155573.6,
+        "tokens_all": 1555736,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.6,
+       "ci": null,
+       "b": 7,
+       "c": 1,
+       "p": 0.0703125
+      },
+      "mm_blind": {
+       "n": 10,
+       "base": {
+        "correct": 3,
+        "accuracy": 0.3,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 4.5,
+        "median_calls": 0.0,
+        "seconds": 48.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4207,
+         "output": 495,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 470.2,
+        "tokens_all": 4702,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 10,
+        "accuracy": 1.0,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 46.550000000000004,
+        "median_calls": 7.5,
+        "seconds": 659.6,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1915905,
+         "output": 4946,
+         "cache_read": 1489152,
+         "cache_write": 0
+        },
+        "tokens_mean": 192085.1,
+        "tokens_all": 1920851,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.7,
+       "ci": null,
+       "b": 7,
+       "c": 0,
+       "p": 0.015625
+      }
+     },
+     "6-24h": {
+      "n": 10,
+      "arms": {
+       "blind": {
+        "correct": 4,
+        "accuracy": 0.4,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 6.300000000000001,
+        "median_calls": 0.0,
+        "seconds": 63.6,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4208,
+         "output": 534,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 474.2,
+        "tokens_all": 4742,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.1681803285264069,
+         0.6873262320788047
+        ]
+       },
+       "files": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 25.35,
+        "median_calls": 4.5,
+        "seconds": 416.79999999999995,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1015737,
+         "output": 10253,
+         "cache_read": 702208,
+         "cache_write": 0
+        },
+        "tokens_mean": 102599.0,
+        "tokens_all": 1025990,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.5958499704752279,
+         0.982123787103926
+        ]
+       },
+       "mm": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 21.35,
+        "median_calls": 4.5,
+        "seconds": 405.0,
+        "timeouts": 0,
+        "tokens": {
+         "input": 2196604,
+         "output": 4936,
+         "cache_read": 1814400,
+         "cache_write": 0
+        },
+        "tokens_mean": 220154.0,
+        "tokens_all": 2201540,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.5958499704752279,
+         0.982123787103926
+        ]
+       }
+      },
+      "mm_files": {
+       "n": 10,
+       "base": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 25.35,
+        "median_calls": 4.5,
+        "seconds": 416.79999999999995,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1015737,
+         "output": 10253,
+         "cache_read": 702208,
+         "cache_write": 0
+        },
+        "tokens_mean": 102599.0,
+        "tokens_all": 1025990,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 21.35,
+        "median_calls": 4.5,
+        "seconds": 405.0,
+        "timeouts": 0,
+        "tokens": {
+         "input": 2196604,
+         "output": 4936,
+         "cache_read": 1814400,
+         "cache_write": 0
+        },
+        "tokens_mean": 220154.0,
+        "tokens_all": 2201540,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.0,
+       "ci": null,
+       "b": 1,
+       "c": 1,
+       "p": 1.0
+      },
+      "files_blind": {
+       "n": 10,
+       "base": {
+        "correct": 4,
+        "accuracy": 0.4,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 6.300000000000001,
+        "median_calls": 0.0,
+        "seconds": 63.6,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4208,
+         "output": 534,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 474.2,
+        "tokens_all": 4742,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 25.35,
+        "median_calls": 4.5,
+        "seconds": 416.79999999999995,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1015737,
+         "output": 10253,
+         "cache_read": 702208,
+         "cache_write": 0
+        },
+        "tokens_mean": 102599.0,
+        "tokens_all": 1025990,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.5,
+       "ci": null,
+       "b": 5,
+       "c": 0,
+       "p": 0.0625
+      },
+      "mm_blind": {
+       "n": 10,
+       "base": {
+        "correct": 4,
+        "accuracy": 0.4,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 6.300000000000001,
+        "median_calls": 0.0,
+        "seconds": 63.6,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4208,
+         "output": 534,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 474.2,
+        "tokens_all": 4742,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 21.35,
+        "median_calls": 4.5,
+        "seconds": 405.0,
+        "timeouts": 0,
+        "tokens": {
+         "input": 2196604,
+         "output": 4936,
+         "cache_read": 1814400,
+         "cache_write": 0
+        },
+        "tokens_mean": 220154.0,
+        "tokens_all": 2201540,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.5,
+       "ci": null,
+       "b": 5,
+       "c": 0,
+       "p": 0.0625
+      }
+     },
+     "24h+": {
+      "n": 10,
+      "arms": {
+       "blind": {
+        "correct": 5,
+        "accuracy": 0.5,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 6.550000000000001,
+        "median_calls": 0.0,
+        "seconds": 62.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4190,
+         "output": 564,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 475.4,
+        "tokens_all": 4754,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.23659308901147935,
+         0.7634069109885206
+        ]
+       },
+       "files": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 44.6,
+        "median_calls": 8.5,
+        "seconds": 552.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1190716,
+         "output": 11047,
+         "cache_read": 899072,
+         "cache_write": 0
+        },
+        "tokens_mean": 120176.3,
+        "tokens_all": 1201763,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.5958499704752279,
+         0.982123787103926
+        ]
+       },
+       "mm": {
+        "correct": 7,
+        "accuracy": 0.7,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 41.0,
+        "median_calls": 7.0,
+        "seconds": 1128.0,
+        "timeouts": 0,
+        "tokens": {
+         "input": 2664737,
+         "output": 5782,
+         "cache_read": 2277248,
+         "cache_write": 0
+        },
+        "tokens_mean": 267051.9,
+        "tokens_all": 2670519,
+        "tokens_n": 10,
+        "cost_usd": null,
+        "unparsed": 0,
+        "wilson": [
+         0.3967781453459709,
+         0.892208733443606
+        ]
+       }
+      },
+      "mm_files": {
+       "n": 10,
+       "base": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 44.6,
+        "median_calls": 8.5,
+        "seconds": 552.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1190716,
+         "output": 11047,
+         "cache_read": 899072,
+         "cache_write": 0
+        },
+        "tokens_mean": 120176.3,
+        "tokens_all": 1201763,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 7,
+        "accuracy": 0.7,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 41.0,
+        "median_calls": 7.0,
+        "seconds": 1128.0,
+        "timeouts": 0,
+        "tokens": {
+         "input": 2664737,
+         "output": 5782,
+         "cache_read": 2277248,
+         "cache_write": 0
+        },
+        "tokens_mean": 267051.9,
+        "tokens_all": 2670519,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": -0.2,
+       "ci": null,
+       "b": 1,
+       "c": 3,
+       "p": 0.625
+      },
+      "files_blind": {
+       "n": 10,
+       "base": {
+        "correct": 5,
+        "accuracy": 0.5,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 6.550000000000001,
+        "median_calls": 0.0,
+        "seconds": 62.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4190,
+         "output": 564,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 475.4,
+        "tokens_all": 4754,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 9,
+        "accuracy": 0.9,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 44.6,
+        "median_calls": 8.5,
+        "seconds": 552.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 1190716,
+         "output": 11047,
+         "cache_read": 899072,
+         "cache_write": 0
+        },
+        "tokens_mean": 120176.3,
+        "tokens_all": 1201763,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.4,
+       "ci": null,
+       "b": 5,
+       "c": 1,
+       "p": 0.21875
+      },
+      "mm_blind": {
+       "n": 10,
+       "base": {
+        "correct": 5,
+        "accuracy": 0.5,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 6.550000000000001,
+        "median_calls": 0.0,
+        "seconds": 62.1,
+        "timeouts": 0,
+        "tokens": {
+         "input": 4190,
+         "output": 564,
+         "cache_read": 0,
+         "cache_write": 0
+        },
+        "tokens_mean": 475.4,
+        "tokens_all": 4754,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "other": {
+        "correct": 7,
+        "accuracy": 0.7,
+        "n": 10,
+        "absent": 0,
+        "absent_answered": 0,
+        "needles": 10,
+        "abstained": 0,
+        "median_s": 41.0,
+        "median_calls": 7.0,
+        "seconds": 1128.0,
+        "timeouts": 0,
+        "tokens": {
+         "input": 2664737,
+         "output": 5782,
+         "cache_read": 2277248,
+         "cache_write": 0
+        },
+        "tokens_mean": 267051.9,
+        "tokens_all": 2670519,
+        "tokens_n": 10,
+        "cost_usd": null
+       },
+       "diff": 0.2,
+       "ci": null,
+       "b": 3,
+       "c": 1,
+       "p": 0.625
+      }
+     }
+    },
+    "crossover": null,
+    "thin": {},
+    "categories": {
+     "EventRecall": {
+      "n": 9,
+      "blind": 4,
+      "files": 8,
+      "mm": 5
+     },
+     "EntityLog": {
+      "n": 9,
+      "blind": 3,
+      "files": 9,
+      "mm": 8
+     },
+     "RelationMap": {
+      "n": 9,
+      "blind": 3,
+      "files": 9,
+      "mm": 8
+     },
+     "TaskMaster": {
+      "n": 4,
+      "blind": 1,
+      "files": 3,
+      "mm": 4
+     },
+     "HabitInsight": {
+      "n": 9,
+      "blind": 5,
+      "files": 7,
+      "mm": 9
+     }
+    },
+    "work": {
+     "files": {
+      "n": 40,
+      "ask_execs": 0,
+      "asks": 0.0,
+      "finds": 0.0,
+      "looks": 0.0,
+      "known": 40,
+      "windows": 0.0,
+      "gpu_s": 0.0,
+      "estimate_s": null,
+      "held_s": 0.0,
+      "alone": 0,
+      "beyond": 0,
+      "max_s": 0,
+      "views": 1.725,
+      "shells": 6.3
+     },
+     "mm": {
+      "n": 40,
+      "ask_execs": 14,
+      "asks": 1.35,
+      "finds": 4.125,
+      "looks": 1.1,
+      "known": 40,
+      "windows": 271.375,
+      "gpu_s": 38.7275,
+      "estimate_s": 52.5225,
+      "held_s": 0.0,
+      "alone": 0,
+      "beyond": 0,
+      "max_s": 1,
+      "views": 0.0,
+      "shells": 0.0
+     }
+    },
+    "cost": {
+     "blind": {
+      "correct": 16,
+      "n": 40,
+      "s": 14.71875,
+      "tokens_k": 1.176625,
+      "gpu_s": 0.0
+     },
+     "files": {
+      "correct": 36,
+      "n": 40,
+      "s": 53.23333333333333,
+      "tokens_k": 122.78966666666666,
+      "gpu_s": 0.0
+     },
+     "mm": {
+      "correct": 34,
+      "n": 40,
+      "s": 76.63235294117646,
+      "tokens_k": 244.1629411764706,
+      "gpu_s": 45.561764705882354
+     }
+    },
+    "horizon": {
+     "median_s": 12.996779918670654,
+     "max_s": 28.956779956817627,
+     "past_30s": 0,
+     "audited": 50,
+     "after_horizon": 0,
+     "asks": 25,
+     "asks_past_horizon": 1
+    },
+    "appendix": [
+     {
+      "qid": "ego-192",
+      "level": "0-2h",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 12.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 28.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 10.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-129",
+      "level": "0-2h",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 65.8,
+       "problem": null,
+       "beyond": false,
+       "views": 4,
+       "asks": 0
+      },
+      "mm": {
+       "passed": false,
+       "seconds": 101.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 1
+      }
+     },
+     {
+      "qid": "ego-184",
+      "level": "0-2h",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 4.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 10.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 9.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-004",
+      "level": "0-2h",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 4.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 19.4,
+       "problem": null,
+       "beyond": false,
+       "views": 1,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 14.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-092",
+      "level": "0-2h",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 5.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 67.7,
+       "problem": null,
+       "beyond": false,
+       "views": 2,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 48.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 2
+      }
+     },
+     {
+      "qid": "ego-026",
+      "level": "0-2h",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 4.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 27.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": false,
+       "seconds": 123.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 2
+      }
+     },
+     {
+      "qid": "ego-223",
+      "level": "0-2h",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 20.9,
+       "problem": null,
+       "beyond": false,
+       "views": 1,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 31.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-128",
+      "level": "0-2h",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 7.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 36.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 23.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-028",
+      "level": "0-2h",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 9.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 21.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 12.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-216",
+      "level": "0-2h",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 4.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": false,
+       "seconds": 56.9,
+       "problem": null,
+       "beyond": false,
+       "views": 7,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 37.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 1
+      }
+     },
+     {
+      "qid": "ego-196",
+      "level": "2-6h",
+      "template": "TaskMaster",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 7.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 38.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 66.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-159",
+      "level": "2-6h",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 185.5,
+       "problem": null,
+       "beyond": false,
+       "views": 7,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 135.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 4
+      }
+     },
+     {
+      "qid": "ego-122",
+      "level": "2-6h",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 3.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 51.7,
+       "problem": null,
+       "beyond": false,
+       "views": 1,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 26.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-074",
+      "level": "2-6h",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": false,
+       "seconds": 60.0,
+       "problem": null,
+       "beyond": false,
+       "views": 8,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 73.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 2
+      }
+     },
+     {
+      "qid": "ego-093",
+      "level": "2-6h",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 5.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 19.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 20.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-036",
+      "level": "2-6h",
+      "template": "TaskMaster",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 3.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 29.1,
+       "problem": null,
+       "beyond": false,
+       "views": 1,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 11.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-245",
+      "level": "2-6h",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 4.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 84.6,
+       "problem": null,
+       "beyond": false,
+       "views": 3,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 147.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 3
+      }
+     },
+     {
+      "qid": "ego-075",
+      "level": "2-6h",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 5.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 14.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 15.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-098",
+      "level": "2-6h",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 4.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 18.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 24.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-155",
+      "level": "2-6h",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 91.0,
+       "problem": null,
+       "beyond": false,
+       "views": 6,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 138.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 3
+      }
+     },
+     {
+      "qid": "ego-109",
+      "level": "6-24h",
+      "template": "TaskMaster",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 10.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": false,
+       "seconds": 30.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 14.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-108",
+      "level": "6-24h",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 76.1,
+       "problem": null,
+       "beyond": false,
+       "views": 3,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 19.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-142",
+      "level": "6-24h",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 20.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 10.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-163",
+      "level": "6-24h",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 7.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 131.2,
+       "problem": null,
+       "beyond": false,
+       "views": 5,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 196.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 6
+      }
+     },
+     {
+      "qid": "ego-062",
+      "level": "6-24h",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 5.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 45.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 34.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-119",
+      "level": "6-24h",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 7.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 15.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 8.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-116",
+      "level": "6-24h",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 7.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 51.9,
+       "problem": null,
+       "beyond": false,
+       "views": 3,
+       "asks": 0
+      },
+      "mm": {
+       "passed": false,
+       "seconds": 54.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-107",
+      "level": "6-24h",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 6.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 13.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 20.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-166",
+      "level": "6-24h",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 5.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 20.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 22.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-106",
+      "level": "6-24h",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 12.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 23.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 1
+      }
+     },
+     {
+      "qid": "ego-157",
+      "level": "24h+",
+      "template": "HabitInsight",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 9.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": false,
+       "seconds": 106.9,
+       "problem": null,
+       "beyond": false,
+       "views": 4,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 23.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-194",
+      "level": "24h+",
+      "template": "TaskMaster",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 7.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 58.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 52.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-203",
+      "level": "24h+",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 18.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": false,
+       "seconds": 29.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-233",
+      "level": "24h+",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 6.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 25.7,
+       "problem": null,
+       "beyond": false,
+       "views": 1,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 94.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 2
+      }
+     },
+     {
+      "qid": "ego-214",
+      "level": "24h+",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 77.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 15.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-195",
+      "level": "24h+",
+      "template": "EventRecall",
+      "type": "video",
+      "blind": {
+       "passed": true,
+       "seconds": 4.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 28.6,
+       "problem": null,
+       "beyond": false,
+       "views": 2,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 119.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 4
+      }
+     },
+     {
+      "qid": "ego-200",
+      "level": "24h+",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 6.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 30.7,
+       "problem": null,
+       "beyond": false,
+       "views": 4,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 74.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 2
+      }
+     },
+     {
+      "qid": "ego-219",
+      "level": "24h+",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 6.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 60.9,
+       "problem": null,
+       "beyond": false,
+       "views": 2,
+       "asks": 0
+      },
+      "mm": {
+       "passed": false,
+       "seconds": 24.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-193",
+      "level": "24h+",
+      "template": "EntityLog",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 7.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 137.0,
+       "problem": null,
+       "beyond": false,
+       "views": 4,
+       "asks": 0
+      },
+      "mm": {
+       "passed": false,
+       "seconds": 682.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 21
+      }
+     },
+     {
+      "qid": "ego-168",
+      "level": "24h+",
+      "template": "RelationMap",
+      "type": "video",
+      "blind": {
+       "passed": false,
+       "seconds": 3.9,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 8.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 11.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-204",
+      "level": "24h+",
+      "template": "EventRecall",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 9.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 22.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": false,
+       "seconds": 32.0,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-178",
+      "level": "6-24h",
+      "template": "EventRecall",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 5.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 20.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 12.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-053",
+      "level": "0-2h",
+      "template": "EntityLog",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 5.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 14.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 9.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-039",
+      "level": "2-6h",
+      "template": "EntityLog",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 5.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 13.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 11.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-201",
+      "level": "24h+",
+      "template": "RelationMap",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 4.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 16.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 11.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-174",
+      "level": "6-24h",
+      "template": "EntityLog",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 4.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 12.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 9.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-077",
+      "level": "0-2h",
+      "template": "RelationMap",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 6.7,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": false,
+       "seconds": 23.5,
+       "problem": null,
+       "beyond": false,
+       "views": 2,
+       "asks": 0
+      },
+      "mm": {
+       "passed": false,
+       "seconds": 17.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-084",
+      "level": "2-6h",
+      "template": "RelationMap",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 5.8,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 9.5,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 10.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-133",
+      "level": "24h+",
+      "template": "EntityLog",
+      "type": "speech",
+      "blind": {
+       "passed": true,
+       "seconds": 5.4,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 10.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 9.3,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     },
+     {
+      "qid": "ego-221",
+      "level": "6-24h",
+      "template": "HabitInsight",
+      "type": "speech",
+      "blind": {
+       "passed": false,
+       "seconds": 4.2,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "files": {
+       "passed": true,
+       "seconds": 16.1,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      },
+      "mm": {
+       "passed": true,
+       "seconds": 13.6,
+       "problem": null,
+       "beyond": false,
+       "views": 0,
+       "asks": 0
+      }
+     }
+    ]
+   }
+  }
+ },
+ "decider": {
+  "d1-3B": {
+   "first_s": 18.01,
+   "all": {
+    "asked": 50,
+    "found": 33,
+    "p50": 45,
+    "p30": 47,
+    "top5": 47,
+    "p": 0.924,
+    "away": 200,
+    "windows": 27292,
+    "s_per_window": 0.0826610677963992,
+    "stopped": 0
+   },
+   "types": {
+    "video": {
+     "asked": 40,
+     "found": 28,
+     "p50": 36,
+     "p30": 38,
+     "top5": 38,
+     "p": 0.9195,
+     "away": 190,
+     "windows": 27151,
+     "s_per_window": 0.08153078202995008,
+     "stopped": 0
+    },
+    "speech": {
+     "asked": 10,
+     "found": 5,
+     "p50": 9,
+     "p30": 9,
+     "top5": 9,
+     "p": 0.924,
+     "away": 10,
+     "windows": 141,
+     "s_per_window": 0.16201923076923078,
+     "stopped": 0
+    }
+   },
+   "categories": {
+    "EventRecall": {
+     "asked": 11,
+     "found": 8,
+     "p50": 10,
+     "p30": 10,
+     "top5": 10,
+     "p": 0.9195,
+     "away": 68,
+     "windows": 5326,
+     "s_per_window": 0.0810316139767055,
+     "stopped": 0
+    },
+    "EntityLog": {
+     "asked": 13,
+     "found": 8,
+     "p50": 12,
+     "p30": 12,
+     "top5": 12,
+     "p": 0.928,
+     "away": 29,
+     "windows": 5320,
+     "s_per_window": 0.08569051580698835,
+     "stopped": 0
+    },
+    "RelationMap": {
+     "asked": 12,
+     "found": 9,
+     "p50": 11,
+     "p30": 11,
+     "top5": 11,
+     "p": 0.881,
+     "away": 48,
+     "windows": 5448,
+     "s_per_window": 0.08326483638380477,
+     "stopped": 0
+    },
+    "TaskMaster": {
+     "asked": 4,
+     "found": 1,
+     "p50": 3,
+     "p30": 4,
+     "top5": 4,
+     "p": 0.5765,
+     "away": 1,
+     "windows": 2137,
+     "s_per_window": 0.07951789067151077,
+     "stopped": 0
+    },
+    "HabitInsight": {
+     "asked": 10,
+     "found": 7,
+     "p50": 9,
+     "p30": 10,
+     "top5": 10,
+     "p": 0.9359999999999999,
+     "away": 54,
+     "windows": 9061,
+     "s_per_window": 0.08194675540765392,
+     "stopped": 0
+    }
+   }
+  }
+ },
+ "totals": {
+  "results": 150,
+  "problems": {},
+  "to_rerun": 0
+ }
+}

@@ -1,0 +1,205 @@
+{
+ "version": 1,
+ "items": {
+  "4": {
+   "source": "glasses",
+   "question": "Are flowers being put on a table?"
+  },
+  "26": {
+   "source": "glasses",
+   "question": "Is a shelf being assembled?"
+  },
+  "28": {
+   "source": "glasses",
+   "question": "Is someone working in a kitchen?"
+  },
+  "36": {
+   "source": "glasses",
+   "question": "Is a whiteboard listing drinks in view?"
+  },
+  "39": {
+   "source": "transcript",
+   "question": "Does the text talk about century eggs?"
+  },
+  "53": {
+   "source": "transcript",
+   "question": "Does the text talk about buying a hot pot base?"
+  },
+  "62": {
+   "source": "glasses",
+   "question": "Is a shelf being set up?"
+  },
+  "74": {
+   "source": "glasses",
+   "question": "Are slippers on someone's feet?"
+  },
+  "75": {
+   "source": "glasses",
+   "question": "Are dishes being washed?"
+  },
+  "77": {
+   "source": "transcript",
+   "question": "Does the text talk about looking after a ring?"
+  },
+  "84": {
+   "source": "transcript",
+   "question": "Does the text talk about sterile eggs?"
+  },
+  "92": {
+   "source": "glasses",
+   "question": "Is someone using a computer?"
+  },
+  "93": {
+   "source": "glasses",
+   "question": "Is a supermarket entrance in view?"
+  },
+  "98": {
+   "source": "glasses",
+   "question": "Is a shopping list being written on a whiteboard?"
+  },
+  "106": {
+   "source": "glasses",
+   "question": "Is someone shopping in a supermarket?"
+  },
+  "107": {
+   "source": "glasses",
+   "question": "Is a food delivery app open on a phone?"
+  },
+  "108": {
+   "source": "glasses",
+   "question": "Is a delivery person handing over takeout?"
+  },
+  "109": {
+   "source": "glasses",
+   "question": "Is a purchase list on a whiteboard in view?"
+  },
+  "116": {
+   "source": "glasses",
+   "question": "Is an item being taken from someone's hand?"
+  },
+  "119": {
+   "source": "glasses",
+   "question": "Is a pair of glasses being picked up?"
+  },
+  "122": {
+   "source": "glasses",
+   "question": "Is an item being handed over?"
+  },
+  "128": {
+   "source": "glasses",
+   "question": "Is someone walking into the room?"
+  },
+  "129": {
+   "source": "glasses",
+   "question": "Is the view inside a kitchen?"
+  },
+  "133": {
+   "source": "transcript",
+   "question": "Does the text talk about buying baby cabbage?"
+  },
+  "142": {
+   "source": "glasses",
+   "question": "Is someone putting on makeup?"
+  },
+  "155": {
+   "source": "glasses",
+   "question": "Is someone playing a guitar?"
+  },
+  "157": {
+   "source": "glasses",
+   "question": "Is a person's hairstyle clearly in view?"
+  },
+  "159": {
+   "source": "glasses",
+   "question": "Is someone placing a calibration board?"
+  },
+  "163": {
+   "source": "glasses",
+   "question": "Is a microwave being used?"
+  },
+  "166": {
+   "source": "glasses",
+   "question": "Are several people dancing?"
+  },
+  "168": {
+   "source": "glasses",
+   "question": "Is takeout being put in a microwave?"
+  },
+  "174": {
+   "source": "transcript",
+   "question": "Does the text talk about decoration styles?"
+  },
+  "178": {
+   "source": "transcript",
+   "question": "Does the text talk about AI?"
+  },
+  "184": {
+   "source": "glasses",
+   "question": "Is someone holding a doll?"
+  },
+  "192": {
+   "source": "glasses",
+   "question": "Is someone paying at a counter?"
+  },
+  "193": {
+   "source": "glasses",
+   "question": "Is someone riding a moving walkway?"
+  },
+  "194": {
+   "source": "glasses",
+   "question": "Is a shopping plan written on a whiteboard?"
+  },
+  "195": {
+   "source": "glasses",
+   "question": "Is a shopping cart being pushed?"
+  },
+  "196": {
+   "source": "glasses",
+   "question": "Is a shopping list in view?"
+  },
+  "200": {
+   "source": "glasses",
+   "question": "Is a durian in view?"
+  },
+  "201": {
+   "source": "transcript",
+   "question": "Does the text talk about a seafood section?"
+  },
+  "203": {
+   "source": "glasses",
+   "question": "Is a fruit stall in view?"
+  },
+  "204": {
+   "source": "transcript",
+   "question": "Does the text talk about checking out at a supermarket?"
+  },
+  "214": {
+   "source": "glasses",
+   "question": "Are people working together in a room?"
+  },
+  "216": {
+   "source": "glasses",
+   "question": "Is the view from someone seated on a sofa?"
+  },
+  "219": {
+   "source": "glasses",
+   "question": "Are desserts being made?"
+  },
+  "221": {
+   "source": "transcript",
+   "question": "Does the text talk about mineral water?"
+  },
+  "223": {
+   "source": "glasses",
+   "question": "Is someone placing baking utensils on a table?"
+  },
+  "233": {
+   "source": "glasses",
+   "question": "Is a piping bag being used?"
+  },
+  "245": {
+   "source": "glasses",
+   "question": "Is a small flame in view?"
+  }
+ }
+}

@@ -1,0 +1,77 @@
+[project]
+name = "mms"
+version = "0.1.0"
+description = "A local, multimodal long memory for Claude Code and Codex: it records your screen, sound, cameras, files and logs, and a small local model reads them back"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Dan McInerney" }]
+requires-python = ">=3.12,<3.13"
+keywords = ["memory", "mcp", "claude-code", "codex", "multimodal", "agents", "screen-recording"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video :: Capture",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "av>=14",
+    "huggingface-hub>=2.4",
+    "imageio-ffmpeg>=0.6",
+    "mcp>=2.2,<3",
+    "numpy>=2",
+    "pillow>=11",
+    "tomlkit>=0.15.2",
+    "zstandard>=0.23",
+]
+
+[project.urls]
+Homepage = "https://github.com/DanMcInerney/MultimediaSearch"
+Repository = "https://github.com/DanMcInerney/MultimediaSearch"
+Issues = "https://github.com/DanMcInerney/MultimediaSearch/issues"
+
+[project.scripts]
+mms = "mms.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-xdist>=3.8.0",
+]
+# d1-3B (the default), d1-Omni-2B and d1-2B on the GPU, in mms's own env: `uv sync --group d1`
+# transformers is pinned to 5.21.0: 5.22.1 passes **kwargs (sliding_window) on to d1's `_lfm2_conv`, which takes none
+d1 = [
+    "torch",
+    "torchvision",
+    "transformers==5.21.0",
+]
+
+[tool.uv]
+default-groups = ["dev", "d1"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[build-system]
+requires = ["uv_build>=0.9,<0.10"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# the benchmark's modules (bench, haystack, grade...) are imported by the tests as top-level names
+pythonpath = ["benchmarks"]
+# Four workers: on 2026-10-30 a d1 GPU run beside 12-worker suites hung the laptop's GPU driver and crashed Windows
+addopts = "-n 4 --dist loadgroup -m 'not gpu and not codex'"
+markers = [
+    "gpu: loads d1-Omni-2B on the GPU (run with `-m gpu`)",
+    "codex: asks Codex about a synthetic day over mms mcp (run with -m codex; uses the Codex plan's quota)",
+]

@@ -1,0 +1,2498 @@
+{
+ "runs": [
+  {
+   "name": "20261104-0314-pilot-s1",
+   "seed": 1,
+   "scale": "pilot",
+   "days": 3,
+   "commit": "7895548+dirty",
+   "probe": {
+    "status": "passed",
+    "failures": []
+   }
+  }
+ ],
+ "agents": {
+  "claude": {
+   "d1-3B": {
+    "questions": 24,
+    "left_out": 0,
+    "pending": 0,
+    "kinds": {
+     "files": {
+      "capped": 3
+     },
+     "mm": {
+      "timeout": 2
+     }
+    },
+    "all": {
+     "n": 24,
+     "files": {
+      "correct": 18,
+      "accuracy": 0.75,
+      "n": 24,
+      "absent": 7,
+      "absent_answered": 1,
+      "needles": 17,
+      "abstained": 1,
+      "median_s": 57.900000000000006,
+      "median_calls": 27.5,
+      "seconds": 4546.1,
+      "timeouts": 0,
+      "tokens": {
+       "input": 988,
+       "output": 497391,
+       "cache_read": 27934932,
+       "cache_write": 1427068
+      },
+      "tokens_mean": 1244182.4583333333,
+      "tokens_all": 29860379,
+      "tokens_n": 24,
+      "cost_usd": 13.4776512
+     },
+     "mm": {
+      "correct": 22,
+      "accuracy": 0.9166666666666666,
+      "n": 24,
+      "absent": 7,
+      "absent_answered": 0,
+      "needles": 17,
+      "abstained": 0,
+      "median_s": 31.95,
+      "median_calls": 6.5,
+      "seconds": 2941.7999999999997,
+      "timeouts": 2,
+      "tokens": {
+       "input": 258,
+       "output": 34138,
+       "cache_read": 3405609,
+       "cache_write": 503716
+      },
+      "tokens_mean": 179260.04545454544,
+      "tokens_all": 3943721,
+      "tokens_n": 22,
+      "cost_usd": 2.6973209
+     },
+     "diff": 0.16666666666666666,
+     "ci": null,
+     "b": 4,
+     "c": 0,
+     "p": 0.125
+    },
+    "media": {
+     "n": 16,
+     "files": {
+      "correct": 10,
+      "accuracy": 0.625,
+      "n": 16,
+      "absent": 5,
+      "absent_answered": 1,
+      "needles": 11,
+      "abstained": 1,
+      "median_s": 93.95,
+      "median_calls": 34.0,
+      "seconds": 4198.8,
+      "timeouts": 0,
+      "tokens": {
+       "input": 884,
+       "output": 470303,
+       "cache_read": 26703893,
+       "cache_write": 1250880
+      },
+      "tokens_mean": 1776622.5,
+      "tokens_all": 28425960,
+      "tokens_n": 16,
+      "cost_usd": 12.3787073
+     },
+     "mm": {
+      "correct": 14,
+      "accuracy": 0.875,
+      "n": 16,
+      "absent": 5,
+      "absent_answered": 0,
+      "needles": 11,
+      "abstained": 0,
+      "median_s": 45.25,
+      "median_calls": 8.0,
+      "seconds": 2813.2999999999997,
+      "timeouts": 2,
+      "tokens": {
+       "input": 196,
+       "output": 27112,
+       "cache_read": 2876182,
+       "cache_write": 449320
+      },
+      "tokens_mean": 239486.42857142858,
+      "tokens_all": 3352810,
+      "tokens_n": 14,
+      "cost_usd": 2.3564102
+     },
+     "diff": 0.25,
+     "ci": null,
+     "b": 4,
+     "c": 0,
+     "p": 0.125
+    },
+    "levels": {
+     "part": {
+      "n": 5,
+      "n_files": 5,
+      "files": {
+       "correct": 3,
+       "accuracy": 0.6,
+       "n": 5,
+       "absent": 2,
+       "absent_answered": 0,
+       "needles": 3,
+       "abstained": 1,
+       "median_s": 28.5,
+       "median_calls": 28,
+       "seconds": 1089.4,
+       "timeouts": 0,
+       "tokens": {
+        "input": 244,
+        "output": 104945,
+        "cache_read": 6898265,
+        "cache_write": 313901
+       },
+       "tokens_mean": 1463471.0,
+       "tokens_all": 7317355,
+       "tokens_n": 5,
+       "cost_usd": 2.9953685
+      },
+      "mm": {
+       "correct": 5,
+       "accuracy": 1.0,
+       "n": 5,
+       "absent": 2,
+       "absent_answered": 0,
+       "needles": 3,
+       "abstained": 0,
+       "median_s": 33.4,
+       "median_calls": 8,
+       "seconds": 506.09999999999997,
+       "timeouts": 0,
+       "tokens": {
+        "input": 78,
+        "output": 10435,
+        "cache_read": 1265037,
+        "cache_write": 181019
+       },
+       "tokens_mean": 291313.8,
+       "tokens_all": 1456569,
+       "tokens_n": 5,
+       "cost_usd": 0.9550857
+      },
+      "diff": 0.4,
+      "ci": null,
+      "b": 2,
+      "c": 0,
+      "p": 0.5
+     },
+     "day": {
+      "n": 7,
+      "n_files": 7,
+      "files": {
+       "correct": 5,
+       "accuracy": 0.7142857142857143,
+       "n": 7,
+       "absent": 3,
+       "absent_answered": 1,
+       "needles": 4,
+       "abstained": 0,
+       "median_s": 66.0,
+       "median_calls": 34,
+       "seconds": 2143.2000000000003,
+       "timeouts": 0,
+       "tokens": {
+        "input": 408,
+        "output": 263683,
+        "cache_read": 13884469,
+        "cache_write": 651822
+       },
+       "tokens_mean": 2114340.285714286,
+       "tokens_all": 14800382,
+       "tokens_n": 7,
+       "cost_usd": 6.633380900000001
+      },
+      "mm": {
+       "correct": 6,
+       "accuracy": 0.8571428571428571,
+       "n": 7,
+       "absent": 3,
+       "absent_answered": 0,
+       "needles": 4,
+       "abstained": 0,
+       "median_s": 45.0,
+       "median_calls": 8,
+       "seconds": 1244.5,
+       "timeouts": 1,
+       "tokens": {
+        "input": 78,
+        "output": 10596,
+        "cache_read": 1033659,
+        "cache_write": 157698
+       },
+       "tokens_mean": 200338.5,
+       "tokens_all": 1202031,
+       "tokens_n": 6,
+       "cost_usd": 0.8402739
+      },
+      "diff": 0.14285714285714285,
+      "ci": null,
+      "b": 1,
+      "c": 0,
+      "p": 1.0
+     },
+     "week": {
+      "n": 4,
+      "n_files": 4,
+      "files": {
+       "correct": 2,
+       "accuracy": 0.5,
+       "n": 4,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 4,
+       "abstained": 0,
+       "median_s": 105.7,
+       "median_calls": 39.0,
+       "seconds": 966.2,
+       "timeouts": 0,
+       "tokens": {
+        "input": 232,
+        "output": 101675,
+        "cache_read": 5921159,
+        "cache_write": 285157
+       },
+       "tokens_mean": 1577055.75,
+       "tokens_all": 6308223,
+       "tokens_n": 4,
+       "cost_usd": 2.7499579
+      },
+      "mm": {
+       "correct": 3,
+       "accuracy": 0.75,
+       "n": 4,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 4,
+       "abstained": 0,
+       "median_s": 62.45,
+       "median_calls": 10.0,
+       "seconds": 1062.7,
+       "timeouts": 1,
+       "tokens": {
+        "input": 40,
+        "output": 6081,
+        "cache_read": 577486,
+        "cache_write": 110603
+       },
+       "tokens_mean": 231403.33333333334,
+       "tokens_all": 694210,
+       "tokens_n": 3,
+       "cost_usd": 0.5610506
+      },
+      "diff": 0.25,
+      "ci": null,
+      "b": 1,
+      "c": 0,
+      "p": 1.0
+     }
+    },
+    "crossover": null,
+    "thin": {
+     "part": 5,
+     "day": 7,
+     "week": 4
+    },
+    "work": {
+     "files": {
+      "n": 16,
+      "ask_execs": 0,
+      "asks": 0.0,
+      "finds": 0.0,
+      "looks": 0.0,
+      "known": 16,
+      "windows": 0.0,
+      "gpu_s": 0.0,
+      "estimate_s": null,
+      "held_s": 78.7625,
+      "alone": 0,
+      "beyond": 0,
+      "max_s": 0,
+      "views": 17.75,
+      "shells": 18.5
+     },
+     "mm": {
+      "n": 16,
+      "ask_execs": 16,
+      "asks": 5.1875,
+      "finds": 2.0625,
+      "looks": 4.25,
+      "known": 16,
+      "windows": 1835.8125,
+      "gpu_s": 156.1875,
+      "estimate_s": 340.31874999999997,
+      "held_s": 0.0,
+      "alone": 5,
+      "beyond": 3,
+      "max_s": 0,
+      "views": 0.0,
+      "shells": 0.0
+     }
+    },
+    "cost": {
+     "files": {
+      "correct": 10,
+      "n": 16,
+      "s": 419.88,
+      "tokens_k": 2842.596,
+      "gpu_s": 0.0
+     },
+     "mm": {
+      "correct": 14,
+      "n": 16,
+      "s": 200.95,
+      "tokens_k": null,
+      "gpu_s": 178.5
+     }
+    },
+    "scope_all": 1,
+    "types": {
+     "text": {
+      "n": 4,
+      "files": 4,
+      "mm": 4
+     },
+     "records": {
+      "n": 4,
+      "files": 4,
+      "mm": 4
+     },
+     "image": {
+      "n": 7,
+      "files": 7,
+      "mm": 7
+     },
+     "video": {
+      "n": 9,
+      "files": 3,
+      "mm": 7
+     }
+    }
+   }
+  },
+  "codex": {
+   "d1-3B": {
+    "questions": 24,
+    "left_out": 0,
+    "pending": 0,
+    "kinds": {
+     "files": {},
+     "mm": {}
+    },
+    "all": {
+     "n": 24,
+     "files": {
+      "correct": 22,
+      "accuracy": 0.9166666666666666,
+      "n": 24,
+      "absent": 7,
+      "absent_answered": 0,
+      "needles": 17,
+      "abstained": 2,
+      "median_s": 28.15,
+      "median_calls": 5.0,
+      "seconds": 1333.6,
+      "timeouts": 0,
+      "tokens": {
+       "input": 5299263,
+       "output": 27146,
+       "cache_read": 4685440,
+       "cache_write": 0
+      },
+      "tokens_mean": 221933.70833333334,
+      "tokens_all": 5326409,
+      "tokens_n": 24,
+      "cost_usd": null
+     },
+     "mm": {
+      "correct": 23,
+      "accuracy": 0.9583333333333334,
+      "n": 24,
+      "absent": 7,
+      "absent_answered": 0,
+      "needles": 17,
+      "abstained": 1,
+      "median_s": 18.65,
+      "median_calls": 3.0,
+      "seconds": 1513.4,
+      "timeouts": 0,
+      "tokens": {
+       "input": 2696712,
+       "output": 6659,
+       "cache_read": 2376576,
+       "cache_write": 0
+      },
+      "tokens_mean": 112640.45833333333,
+      "tokens_all": 2703371,
+      "tokens_n": 24,
+      "cost_usd": null
+     },
+     "diff": 0.041666666666666664,
+     "ci": null,
+     "b": 1,
+     "c": 0,
+     "p": 1.0
+    },
+    "media": {
+     "n": 16,
+     "files": {
+      "correct": 14,
+      "accuracy": 0.875,
+      "n": 16,
+      "absent": 5,
+      "absent_answered": 0,
+      "needles": 11,
+      "abstained": 2,
+      "median_s": 42.7,
+      "median_calls": 8.5,
+      "seconds": 1188.5,
+      "timeouts": 0,
+      "tokens": {
+       "input": 4915613,
+       "output": 24397,
+       "cache_read": 4445568,
+       "cache_write": 0
+      },
+      "tokens_mean": 308750.625,
+      "tokens_all": 4940010,
+      "tokens_n": 16,
+      "cost_usd": null
+     },
+     "mm": {
+      "correct": 15,
+      "accuracy": 0.9375,
+      "n": 16,
+      "absent": 5,
+      "absent_answered": 0,
+      "needles": 11,
+      "abstained": 1,
+      "median_s": 27.25,
+      "median_calls": 4.0,
+      "seconds": 1426.4,
+      "timeouts": 0,
+      "tokens": {
+       "input": 2438277,
+       "output": 5628,
+       "cache_read": 2147968,
+       "cache_write": 0
+      },
+      "tokens_mean": 152744.0625,
+      "tokens_all": 2443905,
+      "tokens_n": 16,
+      "cost_usd": null
+     },
+     "diff": 0.0625,
+     "ci": null,
+     "b": 1,
+     "c": 0,
+     "p": 1.0
+    },
+    "levels": {
+     "part": {
+      "n": 5,
+      "n_files": 5,
+      "files": {
+       "correct": 5,
+       "accuracy": 1.0,
+       "n": 5,
+       "absent": 2,
+       "absent_answered": 0,
+       "needles": 3,
+       "abstained": 0,
+       "median_s": 40.6,
+       "median_calls": 8,
+       "seconds": 345.7,
+       "timeouts": 0,
+       "tokens": {
+        "input": 1425051,
+        "output": 7589,
+        "cache_read": 1265536,
+        "cache_write": 0
+       },
+       "tokens_mean": 286528.0,
+       "tokens_all": 1432640,
+       "tokens_n": 5,
+       "cost_usd": null
+      },
+      "mm": {
+       "correct": 5,
+       "accuracy": 1.0,
+       "n": 5,
+       "absent": 2,
+       "absent_answered": 0,
+       "needles": 3,
+       "abstained": 0,
+       "median_s": 21.3,
+       "median_calls": 4,
+       "seconds": 333.2,
+       "timeouts": 0,
+       "tokens": {
+        "input": 549268,
+        "output": 1657,
+        "cache_read": 485632,
+        "cache_write": 0
+       },
+       "tokens_mean": 110185.0,
+       "tokens_all": 550925,
+       "tokens_n": 5,
+       "cost_usd": null
+      },
+      "diff": 0.0,
+      "ci": null,
+      "b": 0,
+      "c": 0,
+      "p": 1.0
+     },
+     "day": {
+      "n": 7,
+      "n_files": 7,
+      "files": {
+       "correct": 6,
+       "accuracy": 0.8571428571428571,
+       "n": 7,
+       "absent": 3,
+       "absent_answered": 0,
+       "needles": 4,
+       "abstained": 1,
+       "median_s": 44.8,
+       "median_calls": 9,
+       "seconds": 507.5,
+       "timeouts": 0,
+       "tokens": {
+        "input": 2077112,
+        "output": 10350,
+        "cache_read": 1890688,
+        "cache_write": 0
+       },
+       "tokens_mean": 298208.85714285716,
+       "tokens_all": 2087462,
+       "tokens_n": 7,
+       "cost_usd": null
+      },
+      "mm": {
+       "correct": 7,
+       "accuracy": 1.0,
+       "n": 7,
+       "absent": 3,
+       "absent_answered": 0,
+       "needles": 4,
+       "abstained": 0,
+       "median_s": 26.8,
+       "median_calls": 3,
+       "seconds": 658.3000000000001,
+       "timeouts": 0,
+       "tokens": {
+        "input": 1139288,
+        "output": 2369,
+        "cache_read": 1019136,
+        "cache_write": 0
+       },
+       "tokens_mean": 163093.85714285713,
+       "tokens_all": 1141657,
+       "tokens_n": 7,
+       "cost_usd": null
+      },
+      "diff": 0.14285714285714285,
+      "ci": null,
+      "b": 1,
+      "c": 0,
+      "p": 1.0
+     },
+     "week": {
+      "n": 4,
+      "n_files": 4,
+      "files": {
+       "correct": 3,
+       "accuracy": 0.75,
+       "n": 4,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 4,
+       "abstained": 1,
+       "median_s": 56.55,
+       "median_calls": 10.0,
+       "seconds": 335.3,
+       "timeouts": 0,
+       "tokens": {
+        "input": 1413450,
+        "output": 6458,
+        "cache_read": 1289344,
+        "cache_write": 0
+       },
+       "tokens_mean": 354977.0,
+       "tokens_all": 1419908,
+       "tokens_n": 4,
+       "cost_usd": null
+      },
+      "mm": {
+       "correct": 3,
+       "accuracy": 0.75,
+       "n": 4,
+       "absent": 0,
+       "absent_answered": 0,
+       "needles": 4,
+       "abstained": 1,
+       "median_s": 42.6,
+       "median_calls": 5.0,
+       "seconds": 434.9,
+       "timeouts": 0,
+       "tokens": {
+        "input": 749721,
+        "output": 1602,
+        "cache_read": 643200,
+        "cache_write": 0
+       },
+       "tokens_mean": 187830.75,
+       "tokens_all": 751323,
+       "tokens_n": 4,
+       "cost_usd": null
+      },
+      "diff": 0.0,
+      "ci": null,
+      "b": 0,
+      "c": 0,
+      "p": 1.0
+     }
+    },
+    "crossover": null,
+    "thin": {
+     "part": 5,
+     "day": 7,
+     "week": 4
+    },
+    "work": {
+     "files": {
+      "n": 16,
+      "ask_execs": 0,
+      "asks": 0.0,
+      "finds": 0.0,
+      "looks": 0.0,
+      "known": 16,
+      "windows": 0.0,
+      "gpu_s": 0.0,
+      "estimate_s": null,
+      "held_s": 10.55625,
+      "alone": 0,
+      "beyond": 0,
+      "max_s": 0,
+      "views": 3.4375,
+      "shells": 7.1875
+     },
+     "mm": {
+      "n": 16,
+      "ask_execs": 16,
+      "asks": 2.8125,
+      "finds": 1.125,
+      "looks": 2.125,
+      "known": 16,
+      "windows": 1071.0,
+      "gpu_s": 72.2375,
+      "estimate_s": 340.31874999999997,
+      "held_s": 0.0,
+      "alone": 5,
+      "beyond": 3,
+      "max_s": 0,
+      "views": 0.0,
+      "shells": 0.0
+     }
+    },
+    "cost": {
+     "files": {
+      "correct": 14,
+      "n": 16,
+      "s": 84.89285714285714,
+      "tokens_k": 352.85785714285714,
+      "gpu_s": 0.0
+     },
+     "mm": {
+      "correct": 15,
+      "n": 16,
+      "s": 95.09333333333333,
+      "tokens_k": 162.92700000000002,
+      "gpu_s": 77.05333333333333
+     }
+    },
+    "scope_all": 10,
+    "types": {
+     "text": {
+      "n": 4,
+      "files": 4,
+      "mm": 4
+     },
+     "records": {
+      "n": 4,
+      "files": 4,
+      "mm": 4
+     },
+     "image": {
+      "n": 7,
+      "files": 7,
+      "mm": 7
+     },
+     "video": {
+      "n": 9,
+      "files": 7,
+      "mm": 8
+     }
+    }
+   }
+  }
+ },
+ "agent_models": {
+  "claude": {
+   "claude-sonnet-5-5": 55
+  },
+  "codex": {
+   "gpt-6.1-terra at medium effort": 55
+  }
+ },
+ "pooled": {
+  "claude": {
+   "levels": {
+    "part": {
+     "n": 5,
+     "n_files": 5,
+     "files": {
+      "correct": 3,
+      "accuracy": 0.6,
+      "n": 5,
+      "absent": 2,
+      "absent_answered": 0,
+      "needles": 3,
+      "abstained": 1,
+      "median_s": 28.5,
+      "median_calls": 28,
+      "seconds": 1089.4,
+      "timeouts": 0,
+      "tokens": {
+       "input": 244,
+       "output": 104945,
+       "cache_read": 6898265,
+       "cache_write": 313901
+      },
+      "tokens_mean": 1463471.0,
+      "tokens_all": 7317355,
+      "tokens_n": 5,
+      "cost_usd": 2.9953685
+     },
+     "mm": {
+      "correct": 5,
+      "accuracy": 1.0,
+      "n": 5,
+      "absent": 2,
+      "absent_answered": 0,
+      "needles": 3,
+      "abstained": 0,
+      "median_s": 33.4,
+      "median_calls": 8,
+      "seconds": 506.09999999999997,
+      "timeouts": 0,
+      "tokens": {
+       "input": 78,
+       "output": 10435,
+       "cache_read": 1265037,
+       "cache_write": 181019
+      },
+      "tokens_mean": 291313.8,
+      "tokens_all": 1456569,
+      "tokens_n": 5,
+      "cost_usd": 0.9550857
+     },
+     "diff": 0.4,
+     "ci": null,
+     "b": 2,
+     "c": 0,
+     "p": 0.5
+    },
+    "day": {
+     "n": 7,
+     "n_files": 7,
+     "files": {
+      "correct": 5,
+      "accuracy": 0.7142857142857143,
+      "n": 7,
+      "absent": 3,
+      "absent_answered": 1,
+      "needles": 4,
+      "abstained": 0,
+      "median_s": 66.0,
+      "median_calls": 34,
+      "seconds": 2143.2000000000003,
+      "timeouts": 0,
+      "tokens": {
+       "input": 408,
+       "output": 263683,
+       "cache_read": 13884469,
+       "cache_write": 651822
+      },
+      "tokens_mean": 2114340.285714286,
+      "tokens_all": 14800382,
+      "tokens_n": 7,
+      "cost_usd": 6.633380900000001
+     },
+     "mm": {
+      "correct": 6,
+      "accuracy": 0.8571428571428571,
+      "n": 7,
+      "absent": 3,
+      "absent_answered": 0,
+      "needles": 4,
+      "abstained": 0,
+      "median_s": 45.0,
+      "median_calls": 8,
+      "seconds": 1244.5,
+      "timeouts": 1,
+      "tokens": {
+       "input": 78,
+       "output": 10596,
+       "cache_read": 1033659,
+       "cache_write": 157698
+      },
+      "tokens_mean": 200338.5,
+      "tokens_all": 1202031,
+      "tokens_n": 6,
+      "cost_usd": 0.8402739
+     },
+     "diff": 0.14285714285714285,
+     "ci": null,
+     "b": 1,
+     "c": 0,
+     "p": 1.0
+    },
+    "week": {
+     "n": 4,
+     "n_files": 4,
+     "files": {
+      "correct": 2,
+      "accuracy": 0.5,
+      "n": 4,
+      "absent": 0,
+      "absent_answered": 0,
+      "needles": 4,
+      "abstained": 0,
+      "median_s": 105.7,
+      "median_calls": 39.0,
+      "seconds": 966.2,
+      "timeouts": 0,
+      "tokens": {
+       "input": 232,
+       "output": 101675,
+       "cache_read": 5921159,
+       "cache_write": 285157
+      },
+      "tokens_mean": 1577055.75,
+      "tokens_all": 6308223,
+      "tokens_n": 4,
+      "cost_usd": 2.7499579
+     },
+     "mm": {
+      "correct": 3,
+      "accuracy": 0.75,
+      "n": 4,
+      "absent": 0,
+      "absent_answered": 0,
+      "needles": 4,
+      "abstained": 0,
+      "median_s": 62.45,
+      "median_calls": 10.0,
+      "seconds": 1062.7,
+      "timeouts": 1,
+      "tokens": {
+       "input": 40,
+       "output": 6081,
+       "cache_read": 577486,
+       "cache_write": 110603
+      },
+      "tokens_mean": 231403.33333333334,
+      "tokens_all": 694210,
+      "tokens_n": 3,
+      "cost_usd": 0.5610506
+     },
+     "diff": 0.25,
+     "ci": null,
+     "b": 1,
+     "c": 0,
+     "p": 1.0
+    }
+   },
+   "crossover": null,
+   "thin": {
+    "part": 5,
+    "day": 7,
+    "week": 4
+   }
+  },
+  "codex": {
+   "levels": {
+    "part": {
+     "n": 5,
+     "n_files": 5,
+     "files": {
+      "correct": 5,
+      "accuracy": 1.0,
+      "n": 5,
+      "absent": 2,
+      "absent_answered": 0,
+      "needles": 3,
+      "abstained": 0,
+      "median_s": 40.6,
+      "median_calls": 8,
+      "seconds": 345.7,
+      "timeouts": 0,
+      "tokens": {
+       "input": 1425051,
+       "output": 7589,
+       "cache_read": 1265536,
+       "cache_write": 0
+      },
+      "tokens_mean": 286528.0,
+      "tokens_all": 1432640,
+      "tokens_n": 5,
+      "cost_usd": null
+     },
+     "mm": {
+      "correct": 5,
+      "accuracy": 1.0,
+      "n": 5,
+      "absent": 2,
+      "absent_answered": 0,
+      "needles": 3,
+      "abstained": 0,
+      "median_s": 21.3,
+      "median_calls": 4,
+      "seconds": 333.2,
+      "timeouts": 0,
+      "tokens": {
+       "input": 549268,
+       "output": 1657,
+       "cache_read": 485632,
+       "cache_write": 0
+      },
+      "tokens_mean": 110185.0,
+      "tokens_all": 550925,
+      "tokens_n": 5,
+      "cost_usd": null
+     },
+     "diff": 0.0,
+     "ci": null,
+     "b": 0,
+     "c": 0,
+     "p": 1.0
+    },
+    "day": {
+     "n": 7,
+     "n_files": 7,
+     "files": {
+      "correct": 6,
+      "accuracy": 0.8571428571428571,
+      "n": 7,
+      "absent": 3,
+      "absent_answered": 0,
+      "needles": 4,
+      "abstained": 1,
+      "median_s": 44.8,
+      "median_calls": 9,
+      "seconds": 507.5,
+      "timeouts": 0,
+      "tokens": {
+       "input": 2077112,
+       "output": 10350,
+       "cache_read": 1890688,
+       "cache_write": 0
+      },
+      "tokens_mean": 298208.85714285716,
+      "tokens_all": 2087462,
+      "tokens_n": 7,
+      "cost_usd": null
+     },
+     "mm": {
+      "correct": 7,
+      "accuracy": 1.0,
+      "n": 7,
+      "absent": 3,
+      "absent_answered": 0,
+      "needles": 4,
+      "abstained": 0,
+      "median_s": 26.8,
+      "median_calls": 3,
+      "seconds": 658.3000000000001,
+      "timeouts": 0,
+      "tokens": {
+       "input": 1139288,
+       "output": 2369,
+       "cache_read": 1019136,
+       "cache_write": 0
+      },
+      "tokens_mean": 163093.85714285713,
+      "tokens_all": 1141657,
+      "tokens_n": 7,
+      "cost_usd": null
+     },
+     "diff": 0.14285714285714285,
+     "ci": null,
+     "b": 1,
+     "c": 0,
+     "p": 1.0
+    },
+    "week": {
+     "n": 4,
+     "n_files": 4,
+     "files": {
+      "correct": 3,
+      "accuracy": 0.75,
+      "n": 4,
+      "absent": 0,
+      "absent_answered": 0,
+      "needles": 4,
+      "abstained": 1,
+      "median_s": 56.55,
+      "median_calls": 10.0,
+      "seconds": 335.3,
+      "timeouts": 0,
+      "tokens": {
+       "input": 1413450,
+       "output": 6458,
+       "cache_read": 1289344,
+       "cache_write": 0
+      },
+      "tokens_mean": 354977.0,
+      "tokens_all": 1419908,
+      "tokens_n": 4,
+      "cost_usd": null
+     },
+     "mm": {
+      "correct": 3,
+      "accuracy": 0.75,
+      "n": 4,
+      "absent": 0,
+      "absent_answered": 0,
+      "needles": 4,
+      "abstained": 1,
+      "median_s": 42.6,
+      "median_calls": 5.0,
+      "seconds": 434.9,
+      "timeouts": 0,
+      "tokens": {
+       "input": 749721,
+       "output": 1602,
+       "cache_read": 643200,
+       "cache_write": 0
+      },
+      "tokens_mean": 187830.75,
+      "tokens_all": 751323,
+      "tokens_n": 4,
+      "cost_usd": null
+     },
+     "diff": 0.0,
+     "ci": null,
+     "b": 0,
+     "c": 0,
+     "p": 1.0
+    }
+   },
+   "crossover": null,
+   "thin": {
+    "part": 5,
+    "day": 7,
+    "week": 4
+   }
+  }
+ },
+ "decider": {
+  "models": {},
+  "templates": {},
+  "missed": [],
+  "asks": 0
+ },
+ "appendix": {
+  "claude": [
+   {
+    "seed": 1,
+    "qid": "text-note-code-1",
+    "level": "part",
+    "type": "text",
+    "files": {
+     "passed": true,
+     "seconds": 27.8,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 10.2,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "text-note-code-2",
+    "level": "day",
+    "type": "text",
+    "files": {
+     "passed": true,
+     "seconds": 14.1,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 17.8,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "text-config-asof-1",
+    "level": "time",
+    "type": "text",
+    "files": {
+     "passed": true,
+     "seconds": 9.6,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 12.3,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "text-absent-note-1",
+    "level": "part",
+    "type": "text",
+    "files": {
+     "passed": true,
+     "seconds": 221.4,
+     "problem": null,
+     "beyond": false,
+     "views": 79,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 23.0,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "records-log-count-1",
+    "level": "part",
+    "type": "records",
+    "files": {
+     "passed": true,
+     "seconds": 5.9,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 10.6,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "records-log-count-2",
+    "level": "day",
+    "type": "records",
+    "files": {
+     "passed": true,
+     "seconds": 18.4,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 14.7,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "records-log-last-1",
+    "level": "part",
+    "type": "records",
+    "files": {
+     "passed": true,
+     "seconds": 23.8,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 9.4,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "records-absent-log-1",
+    "level": "day",
+    "type": "records",
+    "files": {
+     "passed": true,
+     "seconds": 26.3,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 30.5,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-sign-1",
+    "level": "part",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 22.3,
+     "problem": null,
+     "beyond": false,
+     "views": 20,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 11.2,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-sign-2",
+    "level": "day",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 58.6,
+     "problem": null,
+     "beyond": false,
+     "views": 29,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 22.8,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-sign-3",
+    "level": "week",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 90.2,
+     "problem": null,
+     "beyond": false,
+     "views": 11,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 50.2,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 4
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-count-1",
+    "level": "day",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 43.0,
+     "problem": null,
+     "beyond": false,
+     "views": 8,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 14.2,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-count-2",
+    "level": "week",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 97.7,
+     "problem": null,
+     "beyond": false,
+     "views": 7,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 37.5,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-absent-sign-1",
+    "level": "part",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 28.5,
+     "problem": null,
+     "beyond": false,
+     "views": 22,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 28.6,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 2
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-absent-sign-2",
+    "level": "day",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 66.0,
+     "problem": null,
+     "beyond": false,
+     "views": 6,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 45.0,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 3
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-screen-error-1",
+    "level": "part",
+    "type": "video",
+    "files": {
+     "passed": false,
+     "seconds": 412.0,
+     "problem": null,
+     "beyond": false,
+     "views": 7,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 45.5,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-screen-error-2",
+    "level": "day",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 827.2,
+     "problem": null,
+     "beyond": false,
+     "views": 11,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 170.3,
+      "problem": null,
+      "beyond": true,
+      "views": 0,
+      "asks": 4
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-screen-error-3",
+    "level": "week",
+    "type": "video",
+    "files": {
+     "passed": false,
+     "seconds": 664.6,
+     "problem": "capped",
+     "beyond": false,
+     "views": 4,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": false,
+      "seconds": 900.3,
+      "problem": "timeout",
+      "beyond": true,
+      "views": 0,
+      "asks": 27
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-porch-parcel-1",
+    "level": "part",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 28.2,
+     "problem": null,
+     "beyond": false,
+     "views": 11,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 33.4,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-porch-parcel-2",
+    "level": "day",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 57.2,
+     "problem": null,
+     "beyond": false,
+     "views": 15,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 34.5,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-porch-parcel-3",
+    "level": "week",
+    "type": "video",
+    "files": {
+     "passed": false,
+     "seconds": 113.7,
+     "problem": null,
+     "beyond": false,
+     "views": 35,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 74.7,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 2
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-absent-error-1",
+    "level": "part",
+    "type": "video",
+    "files": {
+     "passed": false,
+     "seconds": 598.4,
+     "problem": "capped",
+     "beyond": false,
+     "views": 16,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 387.4,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 11
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-absent-error-2",
+    "level": "day",
+    "type": "video",
+    "files": {
+     "passed": false,
+     "seconds": 806.7,
+     "problem": "capped",
+     "beyond": false,
+     "views": 14,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": false,
+      "seconds": 900.3,
+      "problem": "timeout",
+      "beyond": true,
+      "views": 0,
+      "asks": 21
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-absent-parcel-1",
+    "level": "day",
+    "type": "video",
+    "files": {
+     "passed": false,
+     "seconds": 284.5,
+     "problem": null,
+     "beyond": false,
+     "views": 68,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 57.4,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 2
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-doorbell-1",
+    "level": "part",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 139.0,
+     "problem": null,
+     "beyond": false,
+     "views": 28,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-doorbell-2",
+    "level": "day",
+    "type": "audio",
+    "files": {
+     "passed": false,
+     "seconds": 155.7,
+     "problem": null,
+     "beyond": false,
+     "views": 9,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-alarm-1",
+    "level": "part",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 82.1,
+     "problem": null,
+     "beyond": false,
+     "views": 15,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-alarm-2",
+    "level": "day",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 158.0,
+     "problem": null,
+     "beyond": false,
+     "views": 33,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-alarm-3",
+    "level": "week",
+    "type": "audio",
+    "files": {
+     "passed": false,
+     "seconds": 900.3,
+     "problem": "timeout",
+     "beyond": false,
+     "views": 15,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-absent-doorbell-1",
+    "level": "part",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 376.4,
+     "problem": null,
+     "beyond": false,
+     "views": 16,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-absent-doorbell-2",
+    "level": "day",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 335.5,
+     "problem": null,
+     "beyond": false,
+     "views": 16,
+     "asks": 0
+    },
+    "mm": {}
+   }
+  ],
+  "codex": [
+   {
+    "seed": 1,
+    "qid": "text-note-code-1",
+    "level": "part",
+    "type": "text",
+    "files": {
+     "passed": true,
+     "seconds": 11.3,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 14.1,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "text-note-code-2",
+    "level": "day",
+    "type": "text",
+    "files": {
+     "passed": true,
+     "seconds": 11.8,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 12.1,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "text-config-asof-1",
+    "level": "time",
+    "type": "text",
+    "files": {
+     "passed": true,
+     "seconds": 10.7,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 10.8,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "text-absent-note-1",
+    "level": "part",
+    "type": "text",
+    "files": {
+     "passed": true,
+     "seconds": 58.6,
+     "problem": null,
+     "beyond": false,
+     "views": 3,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 12.2,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "records-log-count-1",
+    "level": "part",
+    "type": "records",
+    "files": {
+     "passed": true,
+     "seconds": 11.0,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 7.0,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "records-log-count-2",
+    "level": "day",
+    "type": "records",
+    "files": {
+     "passed": true,
+     "seconds": 12.6,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 10.8,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "records-log-last-1",
+    "level": "part",
+    "type": "records",
+    "files": {
+     "passed": true,
+     "seconds": 11.5,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 8.0,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "records-absent-log-1",
+    "level": "day",
+    "type": "records",
+    "files": {
+     "passed": true,
+     "seconds": 17.6,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 12.0,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 0
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-sign-1",
+    "level": "part",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 21.9,
+     "problem": null,
+     "beyond": false,
+     "views": 1,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 13.8,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-sign-2",
+    "level": "day",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 25.2,
+     "problem": null,
+     "beyond": false,
+     "views": 2,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 18.3,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-sign-3",
+    "level": "week",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 28.7,
+     "problem": null,
+     "beyond": false,
+     "views": 2,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 19.2,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-count-1",
+    "level": "day",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 27.6,
+     "problem": null,
+     "beyond": false,
+     "views": 2,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 19.0,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-photo-count-2",
+    "level": "week",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 36.1,
+     "problem": null,
+     "beyond": false,
+     "views": 3,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 27.7,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 2
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-absent-sign-1",
+    "level": "part",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 22.4,
+     "problem": null,
+     "beyond": false,
+     "views": 1,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 15.3,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "image-absent-sign-2",
+    "level": "day",
+    "type": "image",
+    "files": {
+     "passed": true,
+     "seconds": 23.1,
+     "problem": null,
+     "beyond": false,
+     "views": 1,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 17.0,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-screen-error-1",
+    "level": "part",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 136.5,
+     "problem": null,
+     "beyond": false,
+     "views": 10,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 124.9,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 4
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-screen-error-2",
+    "level": "day",
+    "type": "video",
+    "files": {
+     "passed": false,
+     "seconds": 124.1,
+     "problem": null,
+     "beyond": false,
+     "views": 5,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 253.4,
+      "problem": null,
+      "beyond": true,
+      "views": 0,
+      "asks": 7
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-screen-error-3",
+    "level": "week",
+    "type": "video",
+    "files": {
+     "passed": false,
+     "seconds": 193.5,
+     "problem": null,
+     "beyond": false,
+     "views": 3,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": false,
+      "seconds": 330.5,
+      "problem": null,
+      "beyond": true,
+      "views": 0,
+      "asks": 10
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-porch-parcel-1",
+    "level": "part",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 40.6,
+     "problem": null,
+     "beyond": false,
+     "views": 2,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 21.3,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-porch-parcel-2",
+    "level": "day",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 44.8,
+     "problem": null,
+     "beyond": false,
+     "views": 3,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 26.8,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-porch-parcel-3",
+    "level": "week",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 77.0,
+     "problem": null,
+     "beyond": false,
+     "views": 6,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 57.5,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-absent-error-1",
+    "level": "part",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 124.3,
+     "problem": null,
+     "beyond": false,
+     "views": 3,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 157.9,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 4
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-absent-error-2",
+    "level": "day",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 212.5,
+     "problem": null,
+     "beyond": false,
+     "views": 6,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 285.6,
+      "problem": null,
+      "beyond": true,
+      "views": 0,
+      "asks": 8
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "video-absent-parcel-1",
+    "level": "day",
+    "type": "video",
+    "files": {
+     "passed": true,
+     "seconds": 50.2,
+     "problem": null,
+     "beyond": false,
+     "views": 5,
+     "asks": 0
+    },
+    "mm": {
+     "d1-3B": {
+      "passed": true,
+      "seconds": 38.2,
+      "problem": null,
+      "beyond": false,
+      "views": 0,
+      "asks": 1
+     }
+    }
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-doorbell-1",
+    "level": "part",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 69.4,
+     "problem": null,
+     "beyond": false,
+     "views": 7,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-doorbell-2",
+    "level": "day",
+    "type": "audio",
+    "files": {
+     "passed": false,
+     "seconds": 77.5,
+     "problem": null,
+     "beyond": false,
+     "views": 2,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-alarm-1",
+    "level": "part",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 42.7,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-alarm-2",
+    "level": "day",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 77.6,
+     "problem": null,
+     "beyond": false,
+     "views": 0,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-mic-alarm-3",
+    "level": "week",
+    "type": "audio",
+    "files": {
+     "passed": false,
+     "seconds": 101.7,
+     "problem": null,
+     "beyond": false,
+     "views": 3,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-absent-doorbell-1",
+    "level": "part",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 107.1,
+     "problem": null,
+     "beyond": false,
+     "views": 12,
+     "asks": 0
+    },
+    "mm": {}
+   },
+   {
+    "seed": 1,
+    "qid": "audio-absent-doorbell-2",
+    "level": "day",
+    "type": "audio",
+    "files": {
+     "passed": true,
+     "seconds": 86.5,
+     "problem": null,
+     "beyond": false,
+     "views": 3,
+     "asks": 0
+    },
+    "mm": {}
+   }
+  ]
+ },
+ "totals": {
+  "results": 110,
+  "problems": {
+   "timeout": 3,
+   "capped": 3
+  },
+  "to_rerun": 0,
+  "ambient_labels": 0
+ }
+}
