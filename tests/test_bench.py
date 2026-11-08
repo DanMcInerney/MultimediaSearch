@@ -471,7 +471,7 @@ def test_every_data_file_is_left_with_the_permissions_its_folder_gives_so_codexs
         (data / "notes").mkdir()
         (work / "moved.mkv").write_bytes(b"x")
         shutil.move(str(work / "moved.mkv"), str(data / "screen" / "moved.mkv"))
-        # whether a moved file reports permissions of its own depends on the machine (GitHub's runners: none), so it is given them
+        # given permissions of its own outright, so the test does not rest on what a move keeps
         subprocess.run(["icacls", str(data / "screen" / "moved.mkv"), "/inheritance:r", "/grant:r", "*S-1-3-4:F"], check=True, capture_output=True)
         (work / "made.mkv").write_bytes(b"y")
         hm._finish(work / "made.mkv", data / "screen" / "made.mkv")
@@ -485,6 +485,36 @@ def test_every_data_file_is_left_with_the_permissions_its_folder_gives_so_codexs
         shutil.rmtree(work, ignore_errors=True)
         if data.exists():
             bench.remove_tree(data)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows permissions")
+def test_the_permissions_check_still_sees_when_powershell_7_is_its_parent(tmp_path, monkeypatch):
+    # a child of PowerShell 7, as on GitHub's runners, inherits a module path whose Get-Acl Windows PowerShell cannot load, and the
+    # check then named no file at all; this stand-in has the same module name and a DLL that is not there
+    module = tmp_path / "modules" / "Microsoft.PowerShell.Security"
+    module.mkdir(parents=True)
+    (module / "Microsoft.PowerShell.Security.psd1").write_text(
+        "@{ GUID='a94c8c7e-9810-47c0-b8af-65089c13a35a'; ModuleVersion='7.0.0.0'; CompatiblePSEditions=@('Core'); "
+        "NestedModules='NotThere.dll'; CmdletsToExport=@('Get-Acl','Set-Acl') }", encoding="utf-8")
+    monkeypatch.setenv("PSModulePath", f"{module.parent};{os.environ.get('PSModulePath', '')}")
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "own.mkv").write_bytes(b"x")
+    subprocess.run(["icacls", str(data / "own.mkv"), "/inheritance:r", "/grant:r", "*S-1-3-4:F"], check=True, capture_output=True)
+    assert bench.own_permissions(data) == ["own.mkv"]
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows permissions")
+def test_a_file_get_acl_cannot_read_fails_the_permissions_check_instead_of_passing_it(tmp_path):
+    # a name ending in a dot exists only through the \\?\ prefix: Get-ChildItem lists it and Get-Acl cannot open it
+    odd = "\\\\?\\" + str(tmp_path / "odd.")
+    with open(odd, "w"):
+        pass
+    try:
+        with pytest.raises(RuntimeError, match="Get-Acl failed"):
+            bench.own_permissions(tmp_path)
+    finally:
+        os.unlink(odd)
 
 
 def test_a_changed_file_stops_the_files_arm_and_a_lost_one_is_written_again(built, tmp_path, capsys):
