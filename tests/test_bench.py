@@ -517,6 +517,22 @@ def test_a_file_get_acl_cannot_read_fails_the_permissions_check_instead_of_passi
         os.unlink(odd)
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows permissions")
+def test_the_permissions_check_names_a_file_under_a_folder_given_by_its_short_name(tmp_path):
+    # GitHub's TEMP is C:\Users\RUNNER~1\...: PowerShell answers with the long name, which is no path under the short one
+    import ctypes
+
+    data = tmp_path / "a-folder-name-too-long-for-eight-three"
+    (data / "sub").mkdir(parents=True)
+    (data / "sub" / "own.mkv").write_bytes(b"x")
+    subprocess.run(["icacls", str(data / "sub" / "own.mkv"), "/inheritance:r", "/grant:r", "*S-1-3-4:F"], check=True, capture_output=True)
+    short = ctypes.create_unicode_buffer(600)
+    ctypes.windll.kernel32.GetShortPathNameW(str(data), short, 600)
+    if short.value in ("", str(data)):
+        pytest.skip("this volume keeps no short names")
+    assert bench.own_permissions(Path(short.value)) == ["sub/own.mkv"]
+
+
 def test_a_changed_file_stops_the_files_arm_and_a_lost_one_is_written_again(built, tmp_path, capsys):
     run = private(built, tmp_path)
     victim = next(p for p in sorted(run.data.rglob("*")) if p.is_file())

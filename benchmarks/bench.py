@@ -633,15 +633,17 @@ def own_permissions(folder: Path) -> list[str]:
         return []
     quoted = str(folder).replace("'", "''")
     # Stop, because a Get-Acl that fails would otherwise read as a file with nothing of its own. No PSModulePath, because a child of
-    # PowerShell 7 (GitHub's runners) inherits one whose Get-Acl Windows PowerShell cannot load.
+    # PowerShell 7 (GitHub's runners) inherits one whose Get-Acl Windows PowerShell cannot load. Each path is cut against the root
+    # PowerShell reports, because it expands a short (8.3) name in the folder it is given.
     script = ("$ErrorActionPreference = 'Stop'; "
-              f"Get-ChildItem -LiteralPath '{quoted}' -Recurse -File | Where-Object {{ @((Get-Acl -LiteralPath $_.FullName).Access"
-              " | Where-Object { -not $_.IsInherited }).Count -gt 0 } | ForEach-Object { $_.FullName }")
+              f"$root = (Get-Item -LiteralPath '{quoted}').FullName; "
+              "Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object { @((Get-Acl -LiteralPath $_.FullName).Access"
+              " | Where-Object { -not $_.IsInherited }).Count -gt 0 } | ForEach-Object { $_.FullName.Substring($root.TrimEnd('\\').Length + 1) }")
     env = {name: value for name, value in os.environ.items() if name.upper() != "PSMODULEPATH"}
     done = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script], capture_output=True, text=True, env=env)
     if done.returncode:
         raise RuntimeError(f"Get-Acl failed on {folder}: {done.stderr.strip()}")
-    return [Path(line.strip()).relative_to(folder).as_posix() for line in done.stdout.splitlines() if line.strip()]
+    return [Path(line.strip()).as_posix() for line in done.stdout.splitlines() if line.strip()]
 
 
 def freeze(data: Path, manifest: Path) -> None:
