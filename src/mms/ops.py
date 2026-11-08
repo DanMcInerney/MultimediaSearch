@@ -8,14 +8,16 @@ ISO 8601 in the host's zone. The ops of jobs (`jobs/start`, `jobs/get`, `jobs/ca
 from __future__ import annotations
 
 import math
+import os
 import re
+import shlex
 import shutil
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
 from mms import config as configuration
-from mms import consent, ingest
+from mms import consent, ingest, modelenv
 from mms.config import (NAME, PROJECT_ID, SET_KINDS, Config, ConfigError, iso, parse_ahead, parse_when,
                              reads_the_home, when)
 from mms.errors import ApiError
@@ -539,11 +541,27 @@ def keep(env: Env, caller: Caller, body: dict) -> dict:
 
 # status
 
+def approve_command(name: str) -> str:
+    """What the owner types to approve a source: `mms` is on no PATH, so the script beside this interpreter, by its absolute
+    path. Windows, where the terminal is PowerShell: the bare path when it has nothing to quote, else `& "<path>"`, since
+    PowerShell reads a quoted path first as a string and then chokes on what follows. Elsewhere, as a POSIX shell quotes it."""
+    script = str(modelenv.mms_script())
+    if os.name != "nt":
+        return f"{shlex.quote(script)} approve {name}"
+    if re.fullmatch(r"[\w./\\:+-]+", script):
+        return f"{script} approve {name}"
+    quote = "'" if re.search(r"[$`]", script) else '"'
+    return f"& {quote}{script.replace(quote, quote * 2)}{quote} approve {name}"
+
+
 def _entry(env: Env, source: configuration.Source | None, name: str, held: dict, states: dict, bytes_: int,
            state: str | None = None) -> dict:
     live = states.get(name, {})
     what = source.what() if source else None
-    unapproved = what is not None and not consent.approved(env.home, name, what)
+    try:
+        unapproved = what is not None and not consent.approved(env.home, name, what)
+    except consent.ConsentError:  # damaged: `status` says so in config_error, whoever asks, and the approvals are not known
+        unapproved = False
     # a running daemon says what it applied; with none (or before it has read a new table) the consent file does
     if state is not None:
         pass
@@ -563,7 +581,7 @@ def _entry(env: Env, source: configuration.Source | None, name: str, held: dict,
     if live.get("error") and state != "needs_approval":
         out["error"] = live["error"]
     if unapproved and state in ("needs_approval", "pending_reload"):
-        out["approve"] = f"mms approve {name}"
+        out["approve"] = approve_command(name)
     return out
 
 
@@ -571,6 +589,12 @@ def status(env: Env, caller: Caller, body: dict) -> dict:
     p = parse("status", body, {"devices": _flag})
     config, store, live = env.config, env.store, env.live
     held = store.status()
+    config_error = env.config_error
+    if config_error is None:  # a daemon has not read a file that went bad yet, and with none, nobody has: say so
+        try:
+            consent.load(env.home)
+        except consent.ConsentError as error:
+            config_error = str(error)
     states = live.source_states() if live else {}
     entries = [_entry(env, config.sources.get(name), name, held.get(name, {}), states,
                       held.get(name, {}).get("item_bytes", 0) + held.get(name, {}).get("record_bytes", 0)
@@ -579,7 +603,7 @@ def status(env: Env, caller: Caller, body: dict) -> dict:
     floor = live.floor() if live else _disk_floor(env)
     out = {"home": str(env.home), "running": live is not None, "pid": live.pid if live else None,
            "started": iso(live.started) if live else None,
-           "config_error": env.config_error, "floor": floor,
+           "config_error": config_error, "floor": floor,
            "decider": live.decider() if live else {"model": config.decider_model, "state": None, "error": None,
                                                     "waiting": None},
            "jobs": live.job_counts() if live else {"running": None, "queued": None}, "sources": entries}
@@ -604,9 +628,10 @@ PENDING = "pending_reload"  # a source's `state` after `source_set`, until the d
 
 
 def source_set(env: Env, caller: Caller, body: dict) -> dict:
-    """Add a source, or change the fields given of one that exists: the rest of its table is kept as it is. A cap of an
-    existing source can stay or rise here, never fall, and its project is the creator's for good. The reply says
-    `pending_reload` until the running daemon has applied the change, and guesses no state."""
+    """Add a source, or change the fields given of one that exists: the rest of its table is kept as it is. A change can keep
+    a cap or raise it, not lower it (a source added again can be given a lower one, never below what it holds), and its
+    project is the creator's for good. The reply says `pending_reload` until the running daemon has applied the change, and
+    guesses no state."""
     p = parse("source_set", body, {"name": _name, "kind": _text(), "device": _text(blank=False), "fps": _number(above=0),
                                    "path": _path, "glob": _text(blank=False), "command": _args,
                                    "time_field": _text(blank=False), "max_gb": _number(above=0),

@@ -16,6 +16,7 @@ import tomllib
 from pathlib import Path, PurePosixPath
 
 import pytest
+from conftest import fake_torch
 from fake_hub import FakeHub
 from mcp_session import drive, text
 
@@ -57,7 +58,8 @@ elif args[:2] == ["mcp", "add"]:
 
 
 class Setup:
-    """The fake machine: home folders, the environment pointing at them, and the fake claude."""
+    """The fake machine: home folders, the environment pointing at them, and the fake claude. Codex is installed and has
+    run (its folder is there), unless a test removes it."""
 
     def __init__(self, tmp: Path):
         self.tmp = tmp
@@ -66,7 +68,7 @@ class Setup:
         self.appdata = tmp / "appdata"
         self.xdg = tmp / "xdg"
         self.fake_dir = tmp / "fake-claude-state"
-        for folder in (self.user, self.fake_dir):
+        for folder in (self.user, self.codex, self.fake_dir):
             folder.mkdir()
         recorder = tmp / "recorder.py"
         recorder.write_text(RECORDER)
@@ -205,7 +207,6 @@ model = "o4-mini"
 
 
 def test_the_codex_file_keeps_its_other_tables_and_comments_and_removal_restores_it(machine):
-    (machine.codex).mkdir()
     file = machine.codex / "config.toml"
     file.write_bytes(CODEX_BEFORE.replace("\n", "\r\n").encode())  # its own line endings too
     assert machine.run("--only", "codex").returncode == 0
@@ -228,15 +229,13 @@ def test_the_codex_file_keeps_its_other_tables_and_comments_and_removal_restores
 
 
 def test_a_codex_entry_with_the_owners_own_keys_keeps_them(machine):
-    machine.codex.mkdir()
-    (machine.codex / "config.toml").write_text('[mcp_servers.mms]\ncommand = "old"\nstartup_timeout_sec = 20\n')
+    (machine.codex / "config.toml").write_text(f"[mcp_servers.mms]\ncommand = '{MMS}'\nargs = ['mcp']\nstartup_timeout_sec = 20\n")
     assert machine.run("--only", "codex").returncode == 0
     table = tomllib.loads((machine.codex / "config.toml").read_text())["mcp_servers"]["mms"]
     assert table == {"command": str(MMS), "args": ["mcp"], "startup_timeout_sec": 20, "default_tools_approval_mode": "approve"}
 
 
 def test_an_approval_mode_the_owner_chose_stays_through_install_and_remove(machine):
-    machine.codex.mkdir()
     (machine.codex / "config.toml").write_text('[mcp_servers.mms]\ndefault_tools_approval_mode = "prompt"\n')
     assert machine.run("--only", "codex").returncode == 0
     table = tomllib.loads((machine.codex / "config.toml").read_text())["mcp_servers"]["mms"]
@@ -247,7 +246,6 @@ def test_an_approval_mode_the_owner_chose_stays_through_install_and_remove(machi
 
 
 def test_a_codex_file_that_does_not_parse_is_a_failure_and_is_left_alone(machine):
-    machine.codex.mkdir()
     (machine.codex / "config.toml").write_text("this is [not toml")
     done = machine.run("--only", "codex")
     assert done.returncode == 1 and status_lines(done)["codex"].startswith("failed")
@@ -291,7 +289,6 @@ def test_an_mms_server_that_is_not_ours_is_refused_and_left_alone(machine):
 
 
 def test_removing_the_codex_entry_keeps_the_owners_other_keys(machine):
-    machine.codex.mkdir()
     (machine.codex / "config.toml").write_text("[mcp_servers.mms]\nstartup_timeout_sec = 20\n")
     home = str(machine.tmp / "h")
     assert machine.run("--only", "codex", MMS_HOME=home).returncode == 0
@@ -300,6 +297,62 @@ def test_removing_the_codex_entry_keeps_the_owners_other_keys(machine):
                      "default_tools_approval_mode": "approve"}
     assert machine.run("--only", "codex", "--remove").returncode == 0
     assert tomllib.loads((machine.codex / "config.toml").read_text())["mcp_servers"] == {"mms": {"startup_timeout_sec": 20}}
+
+
+@pytest.mark.parametrize("table, runs", [
+    ('command = "some-other-mms"\nargs = ["serve"]\n', "some-other-mms serve"),
+    (f'command = \'{MMS}\'\nargs = ["serve"]\n', f"{MMS} serve"),  # our command with other arguments is not ours either
+    ('command = "some-other-mms"\nstartup_timeout_sec = 20\n', "some-other-mms"),
+    ('url = "http://127.0.0.1:9/mcp"\n', "http://127.0.0.1:9/mcp"),
+])
+def test_a_codex_mms_server_that_is_not_ours_is_refused_and_left_alone(machine, table, runs):
+    file = machine.codex / "config.toml"
+    file.write_text(f"# the owner's\n[mcp_servers.mms]\n{table}", encoding="utf-8")
+    before = file.read_bytes()
+    for args in ((), ("--remove",)):
+        done = machine.run("--only", "codex", *args)
+        line = status_lines(done)["codex"]
+        assert done.returncode == 1 and line.startswith("failed") and "not MultimediaSearch's" in line and runs in line, line
+        assert file.read_bytes() == before, "neither replaced nor removed"
+
+
+def test_a_codex_that_is_not_installed_is_skipped_and_its_folder_is_not_made(machine):
+    machine.codex.rmdir()
+    done = machine.run()
+    assert done.returncode == 0, done.stdout + done.stderr
+    steps = status_lines(done)
+    assert steps["codex"] == f"skipped (no Codex folder at {machine.codex}; run Codex once, then this step again)"
+    assert steps["skills"].startswith("done") and str(machine.skill_dirs[0]) in steps["skills"]
+    assert str(machine.skill_dirs[1]) not in steps["skills"] and not machine.codex.exists(), "nothing made it"
+    assert status_lines(machine.run("--remove"))["codex"].startswith("skipped") and not machine.codex.exists()
+    machine.codex.mkdir()  # Codex has run since
+    assert status_lines(machine.run("--only", "codex"))["codex"].startswith("done")
+    assert (machine.codex / "config.toml").is_file()
+
+
+@pytest.mark.parametrize("what", ["another program", "another clone's mms"])
+def test_a_login_entry_that_is_not_ours_is_refused_and_left_alone(machine, what):
+    other = "C:\\Tools\\other.exe" if WINDOWS else "/opt/other/bin/other"
+    if what == "another clone's mms":
+        other = str(MMS.parent.parent / "elsewhere" / MMS.name)
+    machine.login_file.parent.mkdir(parents=True)
+    entry = (f'@echo off\r\nstart "" /min "{other}" start --detach\r\n' if WINDOWS
+             else f"[Desktop Entry]\nType=Application\nExec={other} start --detach\n")
+    machine.login_file.write_bytes(entry.encode("oem" if WINDOWS else "utf-8"))
+    before = machine.login_file.read_bytes()
+    for args in ((), ("--remove",)):
+        done = machine.run("--only", "login", *args)
+        line = status_lines(done)["login"]
+        assert done.returncode == 1 and line.startswith("failed") and "not MultimediaSearch's login entry" in line, line
+        assert machine.login_file.read_bytes() == before, "neither replaced nor deleted"
+
+
+def test_a_login_entry_of_ours_is_replaced_for_another_home_and_removed(machine, tmp_path):
+    assert machine.run("--only", "login").returncode == 0
+    first = machine.login_file.read_bytes()
+    assert status_lines(machine.run("--only", "login", MMS_HOME=str(tmp_path / "h")))["login"].startswith("done")
+    assert machine.login_file.read_bytes() != first and status_lines(machine.run("--only", "login", "--remove"))["login"].startswith("done")
+    assert not machine.login_file.exists()
 
 
 def test_a_skill_folder_that_is_not_ours_is_left_alone(machine):
@@ -425,6 +478,7 @@ def test_the_registered_command_line_starts_the_adapter_and_it_answers(machine, 
 # the model step: `install.main` in this process, the home in tmp_path, and the Hub faked (nothing is downloaded)
 
 MMS_ENV = {name: pin or "1.0.0+cu128" for name, pin in map(modelenv.pinned, decider_d1.D1.requirements)}  # d1's pins, met
+REAL_CUDA_PROBLEM = modelenv.cuda_problem  # taken at import, before the `modelling` fixture makes every machine's GPU findable
 
 
 @pytest.fixture
@@ -438,8 +492,15 @@ def modelling(home, hub, monkeypatch):
     before = real_places()
     monkeypatch.setenv("MMS_HOME", str(home))
     monkeypatch.setattr(modelenv, "installed", lambda: dict(MMS_ENV))
+    monkeypatch.setattr(modelenv, "cuda_problem", lambda backend: None)  # and finding its GPU: no test asks the machine
     yield home
     assert real_places() == before
+
+
+def omni_calls(folder: Path) -> list:
+    """What a download of d1-Omni-2B asks of the Hub: its size at the commit its About pins, then that commit."""
+    about = decider_d1.ABOUT
+    return [("info", about.repo, about.commit), ("download", about.repo, folder, about.commit)]
 
 
 def install_model(capsys, *args: str) -> tuple[int, list[str], str]:
@@ -459,8 +520,9 @@ def test_a_fresh_install_downloads_d1_omni_2b_and_has_nothing_to_say_about_heari
     code, out, err = install_model(capsys)
     assert code == 0
     assert out == [f"model: done (d1-Omni-2B in {folder})"]
-    assert hub.calls == [("info", "LiquidAI/d1-Omni-2B"), ("download", "LiquidAI/d1-Omni-2B", folder, hub.commit)]
-    assert "downloading LiquidAI/d1-Omni-2B at 0000000 (6.3 GB, licence lfm1.0) into" in err, "the work's output is on stderr"
+    assert hub.calls == omni_calls(folder)
+    assert f"downloading LiquidAI/d1-Omni-2B at {decider_d1.ABOUT.commit[:7]} (6.3 GB, licence lfm1.0) into" in err, \
+        "the work's output is on stderr"
     assert configuration.load(modelling).decider_model == folder.as_posix()
 
 
@@ -500,7 +562,7 @@ def test_a_model_named_and_a_models_folder_given_are_downloaded_there_and_used(m
     folder = tmp_path / "big" / "d1-Omni-2B"
     code, out, err = install_model(capsys, "--model", "d1-Omni-2B", "--models-dir", str(tmp_path / "big"))
     assert code == 0 and out == [f"model: done (d1-Omni-2B in {folder})"], "it hears: nothing to say"
-    assert hub.calls == [("info", "LiquidAI/d1-Omni-2B"), ("download", "LiquidAI/d1-Omni-2B", folder, hub.commit)]
+    assert hub.calls == omni_calls(folder)
     assert configuration.load(modelling).decider_model == folder.as_posix()
     hub.calls.clear()
     again = install_model(capsys, "--model", "d1-Omni-2B", "--models-dir", str(tmp_path / "big"))
@@ -516,6 +578,19 @@ def test_a_model_that_cannot_be_used_fails_the_step_with_why_and_the_hub_is_not_
     assert hub.calls == [] and not (modelling / "mms.toml").exists() and not (modelling / "models").exists()
     code, out, err = install_model(capsys, "--model", "nope")
     assert code == 1 and out[0].startswith("model: failed (there is no model folder 'nope' in ") and hub.calls == []
+
+
+def test_a_pc_where_torch_finds_no_cuda_device_fails_the_model_step_before_any_download(modelling, hub, monkeypatch, tmp_path, capsys):
+    """The real check, in a process of this interpreter, against a `torch` that says what a PC with no NVIDIA GPU would."""
+    monkeypatch.setattr(modelenv, "cuda_problem", REAL_CUDA_PROBLEM)
+    fake_torch(tmp_path / "torch-here", monkeypatch, cuda=False)
+    code, out, err = install_model(capsys)
+    assert code == 1 and len(out) == 1
+    assert out[0].startswith("model: failed (d1-Omni-2B runs in mms's own env, which is not ready: torch finds no CUDA device: ")
+    assert "NVIDIA" in out[0] and "uv sync --group d1" in out[0]
+    assert hub.calls == [] and not (modelling / "mms.toml").exists() and not (modelling / "models").exists()
+    fake_torch(tmp_path / "torch-here", monkeypatch, cuda=True)
+    assert install_model(capsys)[0] == 0 and [call[0] for call in hub.calls] == ["info", "download"]
 
 
 def test_removing_leaves_the_weights_and_the_setting_and_says_so(modelling, hub, capsys):

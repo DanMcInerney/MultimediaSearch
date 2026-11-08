@@ -4,6 +4,7 @@ writer the daemon edits that file with, and the times the API and scripts take a
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import shutil
@@ -12,7 +13,7 @@ import time
 import tomllib
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePath
 from urllib.parse import urlsplit
 
 import tomlkit
@@ -98,9 +99,19 @@ def default_home() -> Path:
 
 # checking the file
 
+def _finite(value) -> bool:
+    """Whether a number is one a limit can be: TOML has `inf` and `nan`, and integers too big for a float."""
+    try:
+        return math.isfinite(float(value))
+    except OverflowError:
+        return False
+
+
 def _number(label: str, value, *, above: float | None = None, atleast: float | None = None) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{label} is a number, not {value!r}")
+    if not _finite(value):
+        raise ValueError(f"{label} is a finite number, not {value!r}")
     if above is not None and not value > above:
         raise ValueError(f"{label} is a number above {above:g}, not {value!r}")
     if atleast is not None and not value >= atleast:
@@ -119,6 +130,16 @@ def _folder(label: str, value) -> str:
     and the file's other paths are never resolved against the home either."""
     if not Path(_text(label, value)).expanduser().is_absolute():
         raise ValueError(f"{label} is an absolute path (or starts with ~), not {value!r}")
+    return value
+
+
+def _glob(label: str, value) -> str:
+    """The pattern of the files under a folder or log source's path. It stays under the path: the home guard checks the path
+    alone, so a `..` segment, or a pattern that is absolute or names a drive, could reach anywhere (the daemon's token)."""
+    pure = PurePath(_text(label, value))
+    if pure.drive or pure.root or ".." in re.split(r"[\\/]", value):
+        raise ValueError(f"{label} is a pattern under the path, with no '..' segment, and not absolute or with a drive, "
+                         f"not {value!r}")
     return value
 
 
@@ -163,8 +184,8 @@ OPTIONS = {
     "camera": {"device": _text, "fps": _above_zero, "segment_s": _above_zero},
     "ffmpeg": {"input": _args, "preset": _one_of(*PRESETS, "none"), "encode": _list_of_text,
                "media": _one_of("video", "audio"), "segment_s": _above_zero, "max_width": _even_width},
-    "folder": {"path": _text, "glob": _text, "rescan_s": _above_zero, "copy_max_mb": _at_least_zero},
-    "log": {"path": _text, "glob": _text, "rescan_s": _above_zero, "time_field": _text},
+    "folder": {"path": _text, "glob": _glob, "rescan_s": _above_zero, "copy_max_mb": _at_least_zero},
+    "log": {"path": _text, "glob": _glob, "rescan_s": _above_zero, "time_field": _text},
     "command": {"command": _args, "time_field": _text},
     "program": {"segment_s": _above_zero},
     "push": {},
@@ -210,8 +231,8 @@ def _source(name: str, raw) -> Source:
 def _keep_number(source: str, key: str, value) -> float | None:
     if value is None:
         return None
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
-        raise ValueError(f"source {source!r}: keep.{key} is a number of at least 0, not {value!r}")
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not _finite(value) or value < 0:
+        raise ValueError(f"source {source!r}: keep.{key} is a finite number of at least 0, not {value!r}")
     return float(value)
 
 
@@ -266,22 +287,39 @@ def load_text(home: Path | str, text: str) -> Config:
         values: dict = {}
         for section, known in (("memory", MEMORY), ("decider", DECIDER)):
             table = raw.get(section, {})
+            if not isinstance(table, dict):
+                raise ValueError(f"[{section}] is a table, not {table!r}")
             bad = sorted(set(table) - set(known))
             if bad:
                 raise ValueError(f"[{section}] takes {', '.join(known)}, not {bad}")
             for key, value in table.items():
                 attribute, check = known[key]
                 values[attribute] = check(value)
-        sources = {name: _source(name, table) for name, table in raw.get("sources", {}).items()}
+        tables = raw.get("sources", {})
+        if not isinstance(tables, dict):
+            raise ValueError(f"sources is a table of [sources.<name>] tables, not {tables!r}")
+        sources = {name: _source(name, table) for name, table in tables.items()}
     except (tomllib.TOMLDecodeError, ValueError) as error:
         raise ConfigError(str(error)) from None
     return Config(home=home, sources=sources, **values)
 
 
+def read(file: Path) -> str:
+    """The text of a `mms.toml`, "" when there is none. A file that cannot be read, or is not UTF-8 (PowerShell 5.1's `>`
+    writes UTF-16), is a `ConfigError` like any other bad file."""
+    try:
+        return file.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return ""
+    except UnicodeDecodeError as error:
+        raise ConfigError(f"{file} is not UTF-8 text ({error}): save it as UTF-8") from None
+    except OSError as error:
+        raise ConfigError(f"{file} cannot be read: {error}") from None
+
+
 def load(home: Path | str | None = None) -> Config:
     home = Path(home).expanduser() if home else default_home()
-    file = home / FILE
-    return load_text(home, file.read_text(encoding="utf-8") if file.exists() else "")
+    return load_text(home, read(home / FILE))
 
 
 def ffmpeg_exe(config: Config | None = None) -> str:
@@ -306,7 +344,7 @@ def _edit(home: Path | str, change) -> object:
     home = Path(home)
     file = home / FILE
     with _writing:
-        text = file.read_text(encoding="utf-8") if file.exists() else ""
+        text = read(file)
         load_text(home, text)
         doc = tomlkit.parse(text)
         result = change(doc)

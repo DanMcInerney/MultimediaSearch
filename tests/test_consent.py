@@ -5,15 +5,16 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
 from pathlib import Path
 
-from conftest import ROOT, env, mms, wait_for, write_config
+from conftest import ROOT, approve_hint, env, in_the_owners_terminal, mms, wait_for, write_config
 
 from mms import config as configuration
-from mms import consent
+from mms import consent, modelenv, ops
 from mms.store import Store
 
 TONE = '[sources.tone]\nkind = "ffmpeg"\npreset = "audio"\ninput = ["-re", "-f", "lavfi", "-i", "sine=frequency=440"]\nsegment_s = 1\n'
@@ -60,7 +61,7 @@ def test_an_unapproved_source_starts_nothing_and_once_approved_starts_with_no_re
     api = served().api
     pid = api.call("status")["pid"]
     tone = states(api)["tone"]
-    assert tone["state"] == "needs_approval" and tone["approve"] == "mms approve tone"
+    assert tone["state"] == "needs_approval" and tone["approve"] == approve_hint("tone")
     time.sleep(0.8)
     assert not (home / "streams" / "tone").exists(), "nothing started"
     consent.record(home, "tone", configuration.load(home).sources["tone"].what())
@@ -159,3 +160,130 @@ def test_no_call_of_the_api_approves(home, served, tmp_path):
     assert job["state"] in ("failed", "done")
     assert digest() == seen == None, "consent.json is unchanged, and was never made"
     assert not (ROOT / "consent.json").exists()
+
+
+def test_a_bad_mms_toml_at_startup_takes_no_approval_and_the_fixed_file_finds_them_standing(home, daemon):
+    """A bad file gives the daemon a config with no sources, which is no reason to forget what the owner approved."""
+    good = "[memory]\nloop_s = 0.1\nfree_gb = 0\n" + TONE.replace("440", "4430")
+    write_config(home, good)
+    consent.record(home, "gone", "microphone: A Mic That Is In No Table")
+    before = (home / "consent.json").read_bytes()
+    (home / "mms.toml").write_text('[sources.x]\nkind = "telepathy"\n', encoding="utf-8")
+    one = daemon()
+    status = one.api.call("status")
+    assert status["running"] is True and status["sources"] == [] and "telepathy" in status["config_error"]
+    assert (home / "consent.json").read_bytes() == before, "every approval stands, the one of no table too"
+    (home / "mms.toml").write_text(good, encoding="utf-8")
+    wait_for(lambda: states(one.api).get("tone", {}).get("state") == "running", what="the fixed file's source to run, approved")
+    wait_for(lambda: "gone" not in consent.load(home), what="a good file to prune the approval of a name in no table")
+    assert "tone" in consent.load(home)
+
+
+def test_a_consent_file_that_does_not_parse_keeps_the_daemon_running_with_no_sources_and_is_left_alone(home, daemon):
+    write_config(home, "[memory]\nloop_s = 0.1\nfree_gb = 0\n" + TONE.replace("440", "4440"))
+    good = (home / "consent.json").read_bytes()
+    damaged = b'{"tone": {"fingerprint": '
+    (home / "consent.json").write_bytes(damaged)
+    one = daemon()
+    status = one.api.call("status")
+    assert status["running"] is True and status["sources"] == []
+    assert "consent.json does not parse" in status["config_error"] and "running with no sources" in one.text()
+    assert (home / "consent.json").read_bytes() == damaged, "nothing is rewritten or removed"
+    assert not (home / "streams" / "tone").exists(), "no source runs on an approval that cannot be read"
+    (home / "consent.json").write_bytes(good)
+    wait_for(lambda: one.api.call("status")["config_error"] is None, what="the fixed file to be read")
+    wait_for(lambda: states(one.api).get("tone", {}).get("state") == "running", what="the approved source to run")
+
+
+def test_a_consent_file_damaged_while_the_daemon_runs_is_reported_by_status_and_the_sources_go_on(home, served):
+    write_config(home, "[memory]\nloop_s = 0.1\nfree_gb = 0\n" + TONE.replace("440", "4450"))
+    api = served().api
+    wait_for(lambda: states(api)["tone"]["state"] == "running", what="the approved source to run")
+    good = (home / "consent.json").read_bytes()
+    (home / "consent.json").write_bytes(b"{nope")
+    status = wait_for(lambda: (s := api.call("status"))["config_error"] and s, what="status to say the file is damaged")
+    assert "consent.json does not parse" in status["config_error"]
+    assert {s["name"]: s["state"] for s in status["sources"]} == {"tone": "running"}, "the last good config goes on"
+    assert (home / "consent.json").read_bytes() == b"{nope", "nothing is rewritten"
+    (home / "consent.json").write_bytes(good)
+    wait_for(lambda: api.call("status")["config_error"] is None, what="the fixed file to be read")
+    assert states(api)["tone"]["state"] == "running"
+
+
+class CountingCapture:
+    """A capture that opens nothing and counts the loop's steps, so that a test can wait for the loop to go round."""
+
+    def __init__(self):
+        self.steps = 0
+
+    def apply(self, config):
+        pass
+
+    def reconcile(self):
+        pass
+
+    def step(self, now):
+        self.steps += 1
+
+    def status(self):
+        return {}
+
+    def pause(self, paused):
+        pass
+
+    def stop(self):
+        pass
+
+
+def test_an_empty_write_that_the_real_content_follows_takes_no_approval_even_when_the_loop_goes_round_between(home, served):
+    """An editor that truncates and then writes is caught by the poll between the two: an empty file is a config with no
+    sources, and approvals dropped then would stop screen and microphone until approved again."""
+    good = "[memory]\nloop_s = 0.1\nfree_gb = 0\n" + TONE.replace("440", "4460")
+    write_config(home, good)
+    before = (home / "consent.json").read_bytes()
+    capture = CountingCapture()
+    one = served(capture=capture)
+    (home / "mms.toml").write_text("", encoding="utf-8")
+    wait_for(lambda: not one.daemon.env.config.sources, what="the empty file to be read: a config with no sources")
+    steps = capture.steps
+    wait_for(lambda: capture.steps >= steps + 8, what="the loop to go round while the file is empty")
+    assert (home / "consent.json").read_bytes() == before, "the approvals stand"
+    (home / "mms.toml").write_text(good, encoding="utf-8")
+    wait_for(lambda: one.daemon.env.config.sources, what="the real content to be read")
+    wait_for(lambda: one.daemon.prune_at is None, what="the prune to come due and be done")
+    assert (home / "consent.json").read_bytes() == before, "and stood through it"
+    assert consent.approved(home, "tone", configuration.load(home).sources["tone"].what())
+
+
+def test_a_removal_that_stays_takes_the_approval_once_the_files_have_stood_still(home, served):
+    write_config(home, "[memory]\nloop_s = 0.1\nfree_gb = 0\n" + TONE.replace("440", "4470"))
+    api = served().api
+    wait_for(lambda: states(api)["tone"]["state"] == "running", what="the approved source to run")
+    assert "tone" in consent.load(home)
+    (home / "mms.toml").write_text("[memory]\nloop_s = 0.1\nfree_gb = 0\n", encoding="utf-8")  # by hand: the source is gone
+    wait_for(lambda: "tone" not in consent.load(home), what="the approval of the removed source to go")
+    (home / "mms.toml").write_text("[memory]\nloop_s = 0.1\nfree_gb = 0\n" + TONE.replace("440", "4470"), encoding="utf-8")
+    wait_for(lambda: states(api)["tone"]["state"] == "needs_approval", what="the source added back to start unapproved")
+
+
+def test_the_approve_command_runs_as_pasted_in_the_owners_terminal(home, served, tmp_path, monkeypatch):
+    """PowerShell, on Windows: a quoted path alone is a string there, and `approve` after it a parse error."""
+    bare = ops.approve_command("screen")
+    assert bare == approve_hint("screen")
+    pasted = in_the_owners_terminal(bare + " --help")
+    assert pasted.returncode == 0 and "approve" in pasted.stdout, pasted.stderr
+    names = ["a b"] + (["d$llar"] if os.name == "nt" else [])  # a space needs quoting, and `$` a string that expands nothing
+    for folder in names:
+        script = tmp_path / folder / ("mms.cmd" if os.name == "nt" else "mms")
+        script.parent.mkdir()
+        script.write_text("@echo off\r\necho got %*\r\n" if os.name == "nt" else '#!/bin/sh\necho got "$@"\n', encoding="utf-8")
+        script.chmod(0o755)
+        monkeypatch.setattr(modelenv, "mms_script", lambda script=script: script)
+        command = ops.approve_command("screen")
+        if os.name == "nt":
+            quote = "'" if "$" in folder else '"'
+            assert command == f"& {quote}{script}{quote} approve screen", "a path with something to quote is called with &"
+        else:
+            assert command == f"'{script}' approve screen"
+        ran = in_the_owners_terminal(command)
+        assert ran.returncode == 0 and ran.stdout.split() == ["got", "approve", "screen"], (command, ran.stdout, ran.stderr)

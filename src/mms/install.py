@@ -1,6 +1,7 @@
 """`mms install` (DESIGN.md §14): register the MCP adapter with Claude Code and Codex, copy the skill, start the daemon at
 login, download and configure the decision model, and start the daemon now. It changes only what is MultimediaSearch's: an `mms`
-server that is another program's, or a skill folder that is another skill's, is refused, not replaced. Every path comes
+server that is another program's (in Claude Code's list or in Codex's file), a skill folder that is another skill's, or a login
+entry that is another program's, is refused, not replaced, and a Codex that is not installed is skipped. Every path comes
 from the environment when it runs, so a test points them all into a temporary folder.
 """
 
@@ -18,7 +19,7 @@ from pathlib import Path
 
 import tomlkit
 
-from mms import client, fetch, prepare
+from mms import client, fetch, modelenv, prepare
 from mms import config as configuration
 
 SERVER = "mms"  # the name the adapter is registered under
@@ -27,7 +28,8 @@ SKILL_SOURCE = Path(__file__).parent / "skills" / SKILL
 STEPS = ("claude", "codex", "skills", "login", "model", "daemon")
 DEFAULT_MODEL = "d1-Omni-2B"  # what a fresh install downloads and uses: a model must be set, and mms ships no weights
 # Codex asks before every MCP tool call unless the server's tools are approved, and `codex exec` refuses them outright.
-# mms's tools can neither approve a device, lower a cap nor delete history (DESIGN §4.3, §4.4), so they are approved.
+# mms's tools cannot approve a device (DESIGN §4.3) or delete what a source holds, but `source_set` can cap a source at exactly
+# what it holds (remove it, add it again), so that its oldest recordings go as new ones arrive (§4.4): the owner accepts that.
 APPROVAL, APPROVE = "default_tools_approval_mode", "approve"
 
 
@@ -69,7 +71,7 @@ def main(argv: list[str] | None = None) -> int:
 
 def mms_script() -> Path:
     """The `mms` script beside this Python (the project's venv), so `mms` need not be on PATH."""
-    script = Path(sys.executable).parent / ("mms.exe" if os.name == "nt" else "mms")
+    script = modelenv.mms_script()
     if not script.is_file():
         raise InstallError(f"there is no mms script beside {sys.executable}; install the project with `uv sync`")
     return script
@@ -91,6 +93,17 @@ def is_ours(command: str | None, args: list[str] | None) -> bool:
     """Whether a registered server is MultimediaSearch's: our `mms` script, run as `mms mcp`."""
     return (command is not None and os.path.normcase(os.path.abspath(command)) == os.path.normcase(str(mms_script()))
             and args == ["mcp"])
+
+
+def _foreign_server(table) -> str | None:
+    """What a `[mcp_servers.mms]` table of Codex's runs, when that is not MultimediaSearch's: a url, or a command that is not
+    our `mms mcp`. None when it is ours, or holds only the owner's own keys (what `--remove` leaves of a table)."""
+    command, args, url = table.get("command"), table.get("args"), table.get("url")
+    if command is None and url is None:
+        return None
+    if url is None and is_ours(str(command), None if args is None else list(args)):
+        return None
+    return str(url) if url is not None else " ".join([str(command), *map(str, args or [])])
 
 
 def claude(remove: bool, exe: str | None) -> tuple[str, str]:
@@ -125,11 +138,16 @@ def claude(remove: bool, exe: str | None) -> tuple[str, str]:
 
 
 def codex(remove: bool) -> tuple[str, str]:
+    if not codex_home().is_dir():  # Codex makes its folder when it first runs: none, none installed (or never run)
+        return "skipped", f"no Codex folder at {codex_home()}; run Codex once, then this step again"
     file = codex_home() / "config.toml"
     before = file.read_bytes().decode("utf-8") if file.exists() else ""
     document = tomlkit.parse(before)
     servers = document.get("mcp_servers")
     existing = servers.get(SERVER) if servers is not None else None
+    if existing is not None and (theirs := _foreign_server(existing)) is not None:
+        raise InstallError(f"[mcp_servers.{SERVER}] in {file} is not MultimediaSearch's (it runs {theirs}): rename it, or "
+                           "remove it by hand, and run this again")
     if remove:  # only what install sets goes: command, args, env.MMS_HOME and our approval mode
         if existing is None:
             return "unchanged", f"{file} has no [mcp_servers.{SERVER}]"
@@ -180,7 +198,10 @@ def skills(remove: bool) -> tuple[str, str]:
     if not remove and not SKILL_SOURCE.is_dir():
         raise InstallError(f"the skill is missing from the package: {SKILL_SOURCE}")
     outcomes = []
-    for target in (Path.home() / ".claude" / "skills" / SKILL, codex_home() / "skills" / SKILL):
+    targets = [Path.home() / ".claude" / "skills" / SKILL]
+    if codex_home().is_dir():  # a Codex that is not there is not given a folder
+        targets.append(codex_home() / "skills" / SKILL)
+    for target in targets:
         if target.exists() and not _is_our_skill(target):
             raise InstallError(f"{target} is not MultimediaSearch's skill (its SKILL.md is not named {SKILL}), so it is left alone")
         if remove:
@@ -240,6 +261,9 @@ def daemon(remove: bool) -> tuple[str, str]:
 def login(remove: bool) -> tuple[str, str]:
     windows = os.name == "nt"
     file = login_file(windows)
+    if file.exists() and not _is_our_login(file, windows):
+        raise InstallError(f"{file} is not MultimediaSearch's login entry (it does not run {_launch(windows, modelenv.mms_script())}), "
+                           "so it is left alone: move it away, and run this again")
     if remove:
         if not file.exists():
             return "unchanged", f"{file} is not there"
@@ -265,14 +289,25 @@ def login_file(windows: bool) -> Path:
     return Path(config) / "autostart" / "mms.desktop"
 
 
+def _launch(windows: bool, mms: Path) -> str:
+    """What a login entry runs: `mms start --detach`, which also tells an entry of ours from another program's."""
+    return f'"{mms}" start --detach' if windows else f"{_quote(str(mms))} start --detach"
+
+
+def _is_our_login(file: Path, windows: bool) -> bool:
+    """Whether a login entry runs our `mms`; one that runs another clone's script, or another program, is not ours."""
+    text = file.read_bytes().decode("oem" if windows else "utf-8", errors="replace")
+    return os.path.normcase(_launch(windows, modelenv.mms_script())) in os.path.normcase(text)
+
+
 def login_text(windows: bool, mms: Path, home: str | None) -> str:
     if windows:
         lines = ["@echo off"]
         if home:
             lines.append(f'set "MMS_HOME={home}"')
-        lines.append(f'start "" /min "{mms}" start --detach')
+        lines.append(f'start "" /min {_launch(windows, mms)}')
         return "\r\n".join(lines) + "\r\n"
-    command = f"{_quote(str(mms))} start --detach"
+    command = _launch(windows, mms)
     if home:
         command = f"env {_quote('MMS_HOME=' + home)} {command}"
     return ("[Desktop Entry]\nType=Application\nName=MultimediaSearch\nComment=Starts the MultimediaSearch daemon\n"

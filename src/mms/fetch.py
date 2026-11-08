@@ -1,8 +1,9 @@
 """Downloading a model (DESIGN.md §13.3): `mms model use` and `prepare` call `download` for a model that is not in its folder.
 This is the one module that imports huggingface_hub, and only when a download runs. Everything goes into the model's folder
-(Xet off, so nothing lands under ~/.cache), with no token and no telemetry. The commit whose size was checked is downloaded
-by its hash, not the branch, so huggingface_hub writes no ref under ~/.cache either. A folder is only downloaded into when
-it is empty, holds a download that stopped, or holds this model unfinished: anything else is somebody's, and is refused.
+(Xet off, so nothing lands under ~/.cache), with no token and no telemetry. The commit is the model's own (`About.commit`),
+asked for and downloaded by its hash, never a branch, so what runs on the machine is what was checked, and huggingface_hub
+writes no ref under ~/.cache either. A folder is only downloaded into when it is empty, holds a download that stopped, or
+holds this model unfinished: anything else is somebody's, and is refused.
 """
 
 from __future__ import annotations
@@ -55,8 +56,9 @@ def ready(about, folder: Path) -> bool:
 
 
 def download(about, folder: Path, keep_free: int = 0) -> None:
-    """Download `about`'s repo into `folder`, then check that what arrived is that model, whole. `keep_free` is the bytes
-    the drive must still have free after it (mms's floor, `[memory] free_gb`, where the home is on this drive)."""
+    """Download `about`'s repo, at `about.commit`, into `folder`, then check that what arrived is that model, whole.
+    `keep_free` is the bytes the drive must still have free after it (mms's floor, `[memory] free_gb`, where the home is on
+    this drive)."""
     if not about.repo:
         raise FetchError(f"{about.name} names no repo: put its folder at {folder}")
     if not _may_download_into(about, folder):
@@ -65,7 +67,7 @@ def download(about, folder: Path, keep_free: int = 0) -> None:
     near = _nearest(folder)
     if near is None:
         raise FetchError(f"{folder} is on a drive that is not there: give another --dir")
-    total, licence, commit = hub_info(about.repo)
+    total, licence = hub_info(about.repo, about.commit)
     free = shutil.disk_usage(near).free
     left = free - max(total - _held(folder), 0)
     has = f"{about.repo} is {_gb(total)} and {Path(os.path.abspath(folder)).anchor} has {_gb(free)} free: "
@@ -74,13 +76,13 @@ def download(about, folder: Path, keep_free: int = 0) -> None:
     if left < keep_free:
         raise FetchError(has + f"downloading it would leave {_gb(left)} free, under [memory] free_gb "
                          f"({keep_free / 1e9:g} GB), which pauses capture: free some space or give another --dir")
-    print(f"downloading {about.repo} at {commit[:7]} ({_gb(total)}, licence {licence or 'not stated: read its LICENSE'}) "
-          f"into {folder}; if it stops, {RETRY}", flush=True)
+    print(f"downloading {about.repo} at {about.commit[:7]} ({_gb(total)}, licence "
+          f"{licence or 'not stated: read its LICENSE'}) into {folder}; if it stops, {RETRY}", flush=True)
     began = time.monotonic()
     folder.mkdir(parents=True, exist_ok=True)
     for stray in (folder / PARTIAL / "download").rglob("*.incomplete"):  # a killed download leaves its file behind
         stray.unlink()
-    hub_download(about.repo, folder, commit)
+    hub_download(about.repo, folder, about.commit)
     claimed = _claimed_name(folder) == about.name
     why = unfinished(folder)
     if not claimed or why:
@@ -94,18 +96,19 @@ def same_drive(a: Path, b: Path) -> bool:
     return near_a is not None and near_b is not None and os.stat(near_a).st_dev == os.stat(near_b).st_dev
 
 
-def hub_info(repo: str) -> tuple[int, str | None, str]:
-    """(the bytes of the repo's files, the name of its licence or None, the commit they are at) from the Hub."""
+def hub_info(repo: str, commit: str) -> tuple[int, str | None]:
+    """(the bytes of the files of `repo` at `commit`, the name of its licence or None) from the Hub."""
     hub = _hub()
     try:
-        info = hub.HfApi().model_info(repo, files_metadata=True, token=False)
+        info = hub.HfApi().model_info(repo, revision=commit, files_metadata=True, token=False)
     except Exception as error:  # the hub raises its own kinds, and so does the network
         raise _failed(repo, error) from None
-    if not info.sha:
-        raise FetchError(f"the download of {repo} failed: the Hub gave no commit for it; {RETRY}")
+    if info.sha != commit:
+        raise FetchError(f"the download of {repo} failed: the Hub answered with commit {info.sha or 'none'}, not the "
+                         f"{commit} that mms pins")
     card = info.card_data
     licence = (getattr(card, "license_name", None) or getattr(card, "license", None)) if card else None
-    return sum(file.size or 0 for file in info.siblings or ()), licence, info.sha
+    return sum(file.size or 0 for file in info.siblings or ()), licence
 
 
 def hub_download(repo: str, folder: Path, commit: str) -> None:

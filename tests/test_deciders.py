@@ -10,6 +10,7 @@ import dataclasses
 import hashlib
 import json
 import math
+import re
 import subprocess
 import sys
 from collections import Counter
@@ -451,6 +452,7 @@ def test_every_known_model_names_its_download_and_no_name_repeats():
     assert len(abouts) == 8, [about.name for about in abouts]
     for about in abouts:
         assert decider.REPO.fullmatch(about.repo) and about.repo_gb > 0, f"{about.name}: {about.repo!r}, {about.repo_gb}"
+        assert re.fullmatch(r"[0-9a-f]{40}", about.commit), f"{about.name} pins no commit of {about.repo}: {about.commit!r}"
     names = [about.name.lower() for about in abouts]
     assert len(set(names)) == len(names), "a name is one model's, whatever its case"
     assert {about.name: (about.repo, about.repo_gb) for about in abouts} == {
@@ -458,6 +460,12 @@ def test_every_known_model_names_its_download_and_no_name_repeats():
         "d3-edge": ("vllm-sr/d3-edge", 1.2), "d3-mini": ("vllm-sr/d3-mini", 9.1), "d3-flash": ("vllm-sr/d3-flash", 16.8),
         "pplx-decider-flash-v1.2": ("perplexity-ai/pplx-decider-flash-v1.2", 9.1),
         "h2o-lightning-4b": ("h2oai/h2o-lightning-4b", 9.4)}
+    assert {about.name: about.commit for about in abouts} == {
+        "d1-Omni-2B": "c8d48c08dada0191c6b362820f055cfb49c99426", "d1-3B": "051bcc464b01b9f92942b364d9586b0ef5912432",
+        "d1-2B": "10e7671d44e4b37700020b1eed3f594c5f2af0b4", "d3-edge": "c454ee39b862248d70abd7f84195d2f54ffe6d43",
+        "d3-mini": "df99bf4ca4418bc6908ee68e9b7479af1f3b8800", "d3-flash": "13dc1cc8ef23caefa765907e1d764751e5629f7d",
+        "pplx-decider-flash-v1.2": "9ff7cf9838e59df461c276b7699d56b244d2af58",
+        "h2o-lightning-4b": "659fc412de8486dbc2477b0d1cb4121e97e72471"}, "the commits that were tested, and run on the machine"
     assert decider.known("D1-3b") == (decider_d1_3b.D1_3B, decider_d1_3b.ABOUT)
     assert decider.known("d3-FLASH") == (decider_d3.D3, decider_d3.FLASH)
     assert decider.known("h2o-lightning-4b") == (decider_h2o.H2o, decider_h2o.ABOUT)
@@ -495,6 +503,11 @@ BAD_FACTS = [
     ("repo", {"repo": "x"}), ("repo", {"repo": "a/b/c"}), ("repo", {"repo": 3}), ("repo", {"repo": None}),
     ("repo", {"repo": "a/b\n"}), ("repo", {"repo": " a/b"}), ("repo", {"repo": ".a/b"}), ("repo", {"repo": "a/"}),
     ("repo", {"repo": "a//b"}), ("repo", {"repo": "https://huggingface.co/a/b"}),
+    ("commit", {"repo": "a/b"}), ("commit", {"commit": "0" * 40}), ("commit", {"repo": "a/b", "commit": "main"}),
+    ("commit", {"repo": "a/b", "commit": "0" * 39}), ("commit", {"repo": "a/b", "commit": "0" * 41}),
+    ("commit", {"repo": "a/b", "commit": "A" * 40}), ("commit", {"repo": "a/b", "commit": "0" * 39 + "g"}),
+    ("commit", {"repo": "a/b", "commit": 3}), ("commit", {"repo": "a/b", "commit": None}),
+    ("commit", {"repo": "a/b", "commit": "0" * 40 + "\n"}),
     ("repo_gb", {"repo_gb": -1}), ("repo_gb", {"repo_gb": math.inf}), ("repo_gb", {"repo_gb": True}),
     ("repo_gb", {"repo_gb": math.nan}), ("repo_gb", {"repo_gb": "6.3"}),
 ]
@@ -511,8 +524,9 @@ def test_about_has_the_new_facts_with_defaults_and_stays_hashable():
     assert (about.hit, about.question_keys, about.notes, about.measured) == (
         0.8, frozenset(decider.QUESTION_KEYS), "", frozenset()), "d1's own defaults, and nothing measured"
     assert (about.repo, about.repo_gb) == ("", 0.0), "a decider mms does not download names no repo"
-    assert About(name="r", repo="owner/name.v1_2-3", repo_gb=0).repo == "owner/name.v1_2-3"
-    assert About(name="r", repo="o/n", repo_gb=6.3).repo_gb == 6.3 and About(name="r", repo_gb=2).repo_gb == 2
+    assert (about.commit, About(name="c", repo="o/n", commit="ab" * 20).commit) == ("", "ab" * 20), "a repo is pinned to a commit"
+    assert About(name="r", repo="owner/name.v1_2-3", commit="0" * 40, repo_gb=0).repo == "owner/name.v1_2-3"
+    assert About(name="r", repo="o/n", commit="0" * 40, repo_gb=6.3).repo_gb == 6.3 and About(name="r", repo_gb=2).repo_gb == 2
     given = About(name="y", hit=1, question_keys=["criteria"], notes="d1.md", measured=("hit", "picture_s"))
     assert given.hit == 1 and given.question_keys == frozenset({"criteria"}) and given.notes == "d1.md"
     assert given.measured == frozenset({"hit", "picture_s"})

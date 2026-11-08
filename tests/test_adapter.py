@@ -16,7 +16,7 @@ from pathlib import Path
 import anyio
 import numpy as np
 import pytest
-from conftest import DECIDER, MODEL_FOLDERS, Api, mms, mms_json, model_folder, wait_for, write_config
+from conftest import DECIDER, MODEL_FOLDERS, Api, approve_hint, mms, mms_json, model_folder, wait_for, write_config
 from mcp import Client, types
 from mcp_session import connected, drive, text
 from PIL import Image
@@ -876,8 +876,8 @@ def test_source_set_reloads_a_folder_live_and_leaves_what_needs_the_owner_unappr
     assert out["ingested"][0]["name"] == "a.md" and out["pid_after"] == out["pid"], "no restart"
     for name, reply in out["unapproved"].items():
         assert reply["state"] in ("needs_approval", "pending_reload"), name  # until the daemon has read the new table
-        assert reply["approve"] == f"mms approve {name}", name
-        assert out["listed"][name]["state"] == "needs_approval" and out["listed"][name]["approve"] == f"mms approve {name}"
+        assert reply["approve"] == approve_hint(name), name
+        assert out["listed"][name]["state"] == "needs_approval" and out["listed"][name]["approve"] == approve_hint(name)
     assert out["no_records"] == [], "an unapproved command is not run"
     assert not any("approve" in name for name in out["tools"])
     assert out["approve_field"]["code"] == "bad_request" and out["approve_field"]["field"] == "approved"

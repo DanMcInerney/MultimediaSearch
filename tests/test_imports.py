@@ -5,8 +5,10 @@ adapter loads none of them, nor huggingface_hub, which only `fetch.py` imports, 
 from __future__ import annotations
 
 import ast
+import re
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 from conftest import ROOT
@@ -66,3 +68,23 @@ def test_importing_the_deciders_gpu_modelenv_the_transport_fetch_prepare_and_the
     done = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True, timeout=120)
     assert done.returncode == 0, done.stderr
     assert done.stdout.strip() == "False", done.stdout
+
+
+IMPORT_NAMES = {"PIL": "pillow", "imageio_ffmpeg": "imageio-ffmpeg", "huggingface_hub": "huggingface-hub"}  # import -> project name
+
+
+def test_every_package_outside_the_worker_that_mms_imports_is_a_declared_dependency():
+    """`uv sync` installs what pyproject.toml declares: a package that is only there because another one pulls it in (the
+    adapter's anyio, through mcp) goes when that one stops."""
+    declared = {re.split(r"[<>=!~\[ ;]", entry, maxsplit=1)[0].lower().replace("_", "-")
+                for entry in tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["dependencies"]}
+    imported = set()
+    for path in outside_the_worker():
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"), filename=str(path))):
+            if isinstance(node, ast.Import):
+                imported |= {alias.name.split(".")[0] for alias in node.names}
+            elif isinstance(node, ast.ImportFrom) and node.level == 0:
+                imported.add((node.module or "").split(".")[0])
+    third_party = {IMPORT_NAMES.get(name, name) for name in imported - set(sys.stdlib_module_names) - {"mms", ""}}
+    assert {"anyio", "pillow", "mcp"} <= third_party, "the scan finds what is imported"
+    assert third_party - declared == set(), "imported, and not in pyproject.toml's dependencies"

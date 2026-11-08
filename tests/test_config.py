@@ -4,12 +4,13 @@ reload, with `source_set` and a hand edit."""
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from pathlib import Path
 
 import pytest
-from conftest import wait_for, write_config
+from conftest import approve_hint, wait_for, write_config
 
 from mms import config as configuration
 from mms import consent
@@ -84,6 +85,9 @@ kind = "push"
     ('[sources.x]\nkind = "telepathy"', "telepathy"),
     ('[sources.x]\nkind = "folder"', "needs path"),
     ('[sources.x]\nkind = "folder"\npath = "a"\nfps = 2', "fps"),
+    ('[sources.x]\nkind = "folder"\npath = "a"\nglob = "../x"', "glob"),
+    ('[sources.x]\nkind = "log"\npath = "a"\nglob = "a/../../x"', "glob"),
+    ('[sources.x]\nkind = "folder"\npath = "a"\nglob = "/etc/x"', "glob"),
     ('[sources.x]\nkind = "screen"\nmax_width = 1921', "even"),
     ('[sources.x]\nkind = "microphone"', "needs device"),
     ('[sources.x]\nkind = "command"\ncommand = "python x.py"', "list"),
@@ -461,7 +465,7 @@ def test_source_set_checks_its_parameters_and_never_approves(home, served, tmp_p
                          ("cam", {"kind": "camera", "device": "Some Cam"}),
                          ("job", {"kind": "command", "command": ["python", "-c", "print(1)"]})):
         entry = api.call("source_set", name=name, max_gb=1, **kwargs)["source"]
-        assert entry["state"] == "pending_reload" and entry["approve"] == f"mms approve {name}", name
+        assert entry["state"] == "pending_reload" and entry["approve"] == approve_hint(name), name
     assert not (home / "consent.json").exists(), "no call approved anything"
     assert before != (home / "mms.toml").read_text(encoding="utf-8")
     time.sleep(0.6)
@@ -469,3 +473,97 @@ def test_source_set_checks_its_parameters_and_never_approves(home, served, tmp_p
     assert {n: status[n]["state"] for n in ("screen", "mic", "cam", "job")} == {n: "needs_approval" for n in ("screen", "mic", "cam", "job")}
     assert not list((home / "streams").glob("*/*")), "nothing opened a device"
     assert not (home / "consent.json").exists()
+
+
+def globs_that_leave_their_path(home: Path) -> list[str]:
+    """Patterns that reach `home` from a folder beside it, as a `glob` must never be able to."""
+    out = ["../home/daemon.json", "..\\home\\daemon.json", "**/../home/daemon.json", "../*/daemon.json",
+           (home / "daemon.json").as_posix()]
+    return out + ["C:daemon.json"] if os.name == "nt" else out
+
+
+def test_a_glob_that_leaves_its_path_is_refused_by_source_set_and_by_a_hand_edit(home, served, tmp_path):
+    """`glob` runs under `path`, and the home guard looks at `path` alone: `../home/daemon.json` made the daemon's token a
+    readable item."""
+    notes = tmp_path / "notes"  # beside the home
+    notes.mkdir()
+    (notes / "a.md").write_text("alpha")
+    write_config(home, "[memory]\nloop_s = 0.1\nfree_gb = 0\n" + folder_toml(notes))
+    api = served().api
+    store = Store(home)
+    wait_for(lambda: store.current_version("notes", "a.md"), what="the source to be read")
+    good = (home / "mms.toml").read_text(encoding="utf-8")
+    for glob in globs_that_leave_their_path(home):
+        for body in ({"name": "notes"}, {"name": "more", "kind": "folder", "path": str(notes), "max_gb": 1},
+                     {"name": "logs", "kind": "log", "path": str(notes), "max_gb": 1}):
+            error = api.failure("source_set", glob=glob, **body)
+            assert (error.status, error.code) == (400, "bad_request") and "glob" in error.error["message"], (glob, body)
+        assert (home / "mms.toml").read_text(encoding="utf-8") == good, f"{glob}: a refusal writes nothing"
+    assert api.call("source_set", name="notes", glob="**/*.md")["source"]["name"] == "notes", "a glob inside is fine"
+
+    (home / "mms.toml").write_text(good, encoding="utf-8")
+    for glob in globs_that_leave_their_path(home):
+        (home / "mms.toml").write_text(good.replace('glob = "*.md"', f"glob = '{glob}'"), encoding="utf-8")
+        status = wait_for(lambda: (s := api.call("status"))["config_error"] and s, what=f"{glob} to be refused")
+        assert "glob" in status["config_error"] and "notes" in sources(status), "the last good config is kept"
+        assert [item.name for item in store.items_of("notes")] == ["a.md"], "nothing outside the folder was read"
+        (home / "mms.toml").write_text(good, encoding="utf-8")
+        wait_for(lambda: api.call("status")["config_error"] is None, what="the good file to be read again")
+
+
+BAD_FILES = [  # what an editor or a shell can leave in mms.toml: none of it is TOML text that a loader can trust
+    ("utf-16", "[memory]\nfree_gb = 1\n".encode("utf-16"), "is not UTF-8 text"),  # PowerShell 5.1's `>`
+    ("cp1252", b'[sources.x]\nkind = "folder"\npath = "caf\xe9"\n', "is not UTF-8 text"),
+    ("sources-number", b"sources = 1\n", "sources is a table"),
+    ("memory-number", b"memory = 1\n", r"\[memory\] is a table"),
+    ("decider-text", b'decider = "x"\n', r"\[decider\] is a table"),
+    ("inf", b"[memory]\njobs = inf\n", "finite number"),
+    ("nan", b"[memory]\nfree_gb = nan\n", "finite number"),
+    ("huge", b"[memory]\nfree_gb = 1" + b"0" * 400 + b"\n", "finite number"),
+    ("cap-inf", b'[sources.x]\nkind = "program"\nkeep = { max_gb = inf }\n', "finite number"),
+]
+THE_FOUR = ["utf-16", "sources-number", "memory-number", "inf"]  # what an editor, a shell or a hand is likely to leave
+
+
+@pytest.mark.parametrize("data, why", [(data, why) for _, data, why in BAD_FILES], ids=[name for name, _, _ in BAD_FILES])
+def test_every_way_a_file_can_fail_is_a_config_error_for_the_loader_and_the_writer(home, data, why):
+    (home / "mms.toml").write_bytes(data)
+    with pytest.raises(ConfigError, match=why):
+        configuration.load(home)
+    with pytest.raises(ConfigError, match=why):
+        configuration.set_source(home, "y", {"kind": "program", "keep": {"max_gb": 1}})
+    assert (home / "mms.toml").read_bytes() == data, "a file that cannot be read is left as it is"
+
+
+def the_four() -> list:
+    return [pytest.param(data, id=name) for name, data, _ in BAD_FILES if name in THE_FOUR]
+
+
+@pytest.mark.parametrize("data", the_four())
+def test_a_running_daemon_keeps_its_last_good_config_when_a_file_cannot_be_read(home, served, tmp_path, data):
+    notes = tmp_path / "notes"
+    notes.mkdir()
+    (notes / "a.md").write_text("alpha")
+    good = "[memory]\nloop_s = 0.1\nfree_gb = 0\n" + folder_toml(notes)
+    write_config(home, good)
+    api = served().api
+    store = Store(home)
+    wait_for(lambda: store.current_version("notes", "a.md"), what="the source to be read")
+    (home / "mms.toml").write_bytes(data)
+    status = wait_for(lambda: (s := api.call("status"))["config_error"] and s, what="config_error")
+    assert status["running"] is True and "notes" in sources(status), "the last good config is kept"
+    (notes / "b.md").write_text("beta")
+    wait_for(lambda: store.current_version("notes", "b.md"), what="the last good config to go on working")
+    (home / "mms.toml").write_text(good, encoding="utf-8")
+    wait_for(lambda: api.call("status")["config_error"] is None, what="the fixed file to be read")
+
+
+@pytest.mark.parametrize("data", the_four())
+def test_a_daemon_that_starts_with_a_file_it_cannot_read_runs_with_no_sources_and_says_why(home, daemon, data):
+    (home / "mms.toml").write_bytes(data)
+    one = daemon()
+    status = one.api.call("status")
+    assert status["running"] is True and status["sources"] == [] and status["config_error"]
+    assert "running with no sources" in one.text()
+    (home / "mms.toml").write_text('[sources.x]\nkind = "push"\n', encoding="utf-8")
+    wait_for(lambda: one.api.call("status")["config_error"] is None, what="the file to be fixed")

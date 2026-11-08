@@ -1,4 +1,4 @@
-# MultimediaSearch: vision (work in progress)
+# MultimediaSearch: vision
 
 Start here. This file says what we are trying to achieve and what is in and out of scope. How is in DESIGN.md, and
 testing is in TESTBED.md.
@@ -37,7 +37,8 @@ It gets back pointers to the moments that match, and looks at them before trusti
 5. **Future-proof.** A better model makes the memory better with no change to what is stored.
 6. **Local and private.** Nothing leaves the laptop. mms goes online only to download a model (and, for d3 and
    Perplexity, its Python packages), when the owner runs `mms install`, `mms model use` or `mms model prepare`: no token, no
-   telemetry.
+   telemetry. A model's own code from its Hugging Face repo runs on the owner's machine with the owner's rights, at a commit
+   mms pins, never the newest.
 7. **Either agent:** Claude Code or Codex.
 
 ## Scope
@@ -59,10 +60,9 @@ It gets back pointers to the moments that match, and looks at them before trusti
   is what decides.
 - **Screen as video or as pictures.** Video is the plan; whether it costs d1 accuracy is unmeasured.
 
-## Status (2 November 2026)
+## Status (8 November 2026)
 
 - Research done, 30 and 31 October (the notes are kept outside the repository).
-- Prototype v0 is built.
 - Design C (DESIGN.md) is built: one daemon, MCP and CLI faces, program logs through a spool. It has run in real Claude Code and Codex sessions in the benchmark ([benchmarks/](benchmarks/README.md)).
 - The decision model is swappable between eight models in five families, each in a process of its own: d1-Omni-2B (the default),
   d1-3B and d1-2B, d3 (edge, mini, flash), Perplexity Decider Flash, and H2O-Lightning-4B (a server the owner runs in
@@ -92,3 +92,5 @@ It gets back pointers to the moments that match, and looks at them before trusti
 - **7 November 2026:** the project is renamed from Multimem to MultimediaSearch, with the short name `mms` for the package,
   the command, the MCP server, `~/.mms` and `MMS_*`.
 - **8 November 2026:** d1-Omni-2B, the one model that hears, is the default in place of d1-3B. `mms install` downloads it.
+- **8 November 2026:** each model is pinned to one commit of its Hugging Face repo, and mms downloads that commit, never the
+  repo's newest: a model's own code runs on the owner's machine, so what runs is what was tested.

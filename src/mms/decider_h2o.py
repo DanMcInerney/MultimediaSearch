@@ -24,7 +24,8 @@ ABOUT = About(name="h2o-lightning-4b", reads={"video", "image"}, types=("noul", 
               extracts_from=(), speech=False,
               max_px=1_638_400,  # serve_config.json image.max_pixels
               questions_per_read=1, picture_s=((230_400, 0.081), (1_638_400, 0.113)), char_s=0.087 / 2000,
-              question_keys={"criteria"}, notes="h2o.md", measured={"picture_s", "char_s"}, repo=MODEL_ID, repo_gb=9.4)
+              question_keys={"criteria"}, notes="h2o.md", measured={"picture_s", "char_s"}, repo=MODEL_ID,
+              commit="659fc412de8486dbc2477b0d1cb4121e97e72471", repo_gb=9.4)
 
 
 class H2o:

@@ -6,6 +6,7 @@ from __future__ import annotations
 import http.client
 import json
 import os
+import shlex
 import subprocess
 import sys
 import textwrap
@@ -60,6 +61,25 @@ def home(tmp_path) -> Path:
 @pytest.fixture(scope="session")
 def ffmpeg() -> str:
     return ffmpeg_exe()
+
+
+MMS_SCRIPT = Path(sys.executable).parent / ("mms.exe" if os.name == "nt" else "mms")  # `mms` is on no PATH: the venv's script
+
+
+def approve_hint(name: str, script: Path = MMS_SCRIPT) -> str:
+    """What status and source_set tell the owner to type to approve a source: the script beside the interpreter, as the owner's
+    terminal takes it. Windows is PowerShell's: a path with a space is `& "<path>"`, a quoted path alone being a string there;
+    a POSIX shell's quoting elsewhere."""
+    if os.name != "nt":
+        return f"{shlex.quote(str(script))} approve {name}"
+    return f'& "{script}" approve {name}' if " " in str(script) else f"{script} approve {name}"
+
+
+def in_the_owners_terminal(command: str) -> subprocess.CompletedProcess:
+    """Run a command line as the owner would paste it: through PowerShell on Windows (not cmd, whose parser is another's), a
+    POSIX shell elsewhere."""
+    argv = (["powershell", "-NoProfile", "-NonInteractive", "-Command", command] if os.name == "nt" else None)
+    return subprocess.run(argv or command, shell=argv is None, capture_output=True, text=True, timeout=120)
 
 
 def write_config(home: Path, text: str, approve: bool = True) -> None:
@@ -134,6 +154,17 @@ def prepared_env(parent: Path, family: str, requirements) -> Path:
     (folder / "mms-env.json").write_text(json.dumps({"family": family, "requirements": list(requirements), "versions": {},
                                                     "prepared": "2026-11-01T00:00:00+00:00"}), encoding="utf-8")
     return folder
+
+
+def fake_torch(folder: Path, monkeypatch, cuda: bool = True, broken: str | None = None) -> None:
+    """A `torch` that a process mms starts finds first (`folder` is put on PYTHONPATH), so that `torch.cuda.is_available()`
+    is asked of it and not of the machine: it says `cuda`, or, with `broken`, fails to import with that message."""
+    package = Path(folder) / "torch"
+    package.mkdir(parents=True, exist_ok=True)
+    body = (f"raise ImportError({broken!r})\n" if broken
+            else f"import types\ncuda = types.SimpleNamespace(is_available=lambda: {cuda!r})\n")
+    (package / "__init__.py").write_text(body, encoding="utf-8")
+    monkeypatch.setenv("PYTHONPATH", str(folder))
 
 
 def mms(home: Path, *args: str, check: bool = True, timeout: float = 120, cwd: Path | None = None) -> subprocess.CompletedProcess:

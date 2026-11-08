@@ -74,7 +74,7 @@ Your agent gets seven tools:
 | `remember` | Stores a note, file, folder or recording at its real time. |
 | `label` | Marks a time range with text, and can keep what it covers from caps. |
 | `sources` | Lists the sources, their state and size, the capture devices, the floor and the model. |
-| `source_set` | Adds, changes or removes a source. It needs a cap, and a cap can only stay or rise. |
+| `source_set` | Adds, changes or removes a source. It needs a cap, never one below what the source already holds. |
 
 `mms install` also gives both agents the `mms-questions` skill, which teaches them how to write a question the model can
 answer: one observable thing, with the time range in `since` and `until`, never in the question.
@@ -85,6 +85,7 @@ answer: one observable thing, with the time range in `since` and `until`, never 
   untested. macOS is not supported.
 - Python 3.12 and [uv](https://docs.astral.sh/uv/).
 - An NVIDIA GPU that runs PyTorch's CUDA 12.8 builds, with room for the model: the default, d1-Omni-2B, is a 4.4 GB download.
+  `mms install` checks for the GPU before it downloads the default model.
 - Claude Code, Codex, or both.
 - ffmpeg is optional: mms uses the one on your PATH, else the binary that `imageio-ffmpeg` installs.
 
@@ -110,14 +111,17 @@ uv run mms install
 
 1. `claude`: registers mms's MCP server with Claude Code, at user scope;
 2. `codex`: registers it with Codex, and lets Codex call mms's tools without asking each time (none of them can approve a
-   device, lower a cap or delete history);
-3. `skills`: copies the `mms-questions` skill to both agents;
+   device or delete what a source holds, but one can cap a source at exactly what it holds, and then its oldest recordings
+   go as new ones arrive); it is skipped when Codex has no `~/.codex` folder yet;
+3. `skills`: copies the `mms-questions` skill to Claude Code, and to Codex when it is there;
 4. `login`: starts the daemon at each login;
-5. `model`: downloads the default model, d1-Omni-2B, naming its licence first, and configures it;
+5. `model`: downloads the default model, d1-Omni-2B, naming its licence first, and configures it; before a download it checks
+   that PyTorch finds your NVIDIA GPU;
 6. `daemon`: starts the daemon now.
 
-It changes only what is mms's, and refuses to overwrite anything else of the same name. `mms install --only <step>` reruns one
-step.
+It changes only what is mms's, and refuses to overwrite anything else of the same name: an `mms` server that is another
+program's in Claude Code's list or Codex's file, another skill's folder, or a login entry that does not start mms. `mms install
+--only <step>` reruns one step.
 
 `mms` is installed in the clone's `.venv`, not on your PATH: run it as `uv run mms ...` from the clone, or activate `.venv`. The
 agents find it without either.
@@ -137,8 +141,8 @@ Ask your agent to record something:
 
 > Keep a memory of my screen, capped at 40 GB.
 
-The agent adds the source with `source_set` and tells you which command to run. A screen, microphone, camera or command source
-waits for you:
+The agent adds the source with `source_set` and tells you which command to run, with the full path of the `mms` script, so you
+can paste it from any folder. A screen, microphone, camera or command source waits for you:
 
 ```bash
 uv run mms approve screen
@@ -189,7 +193,8 @@ keep = { max_gb = 5 }
 | `log` | each new line of the files under a path, as a record | no |
 | `program` | what a program sends with `mms.log()` | no |
 
-Every source takes `keep = { max_gb, when_full, max_days }`. `when_full` is `drop_oldest` (the default) or `thin`, which removes
+A `glob` picks files under its `path` and stays there: a `..` segment, an absolute pattern or a drive is refused. Every source
+takes `keep = { max_gb, when_full, max_days }`. `when_full` is `drop_oldest` (the default) or `thin`, which removes
 the recordings most crowded for their age. `uv run mms status --devices` lists the screens, microphones and cameras mms can open.
 
 ### Logging from your own programs
@@ -219,8 +224,11 @@ d3 and Perplexity get one of their own, which `mms model use` builds; H2O is a s
 | pplx-decider-flash-v1.2 | pictures, video | no | 9.1 GB | Apache-2.0 |
 | h2o-lightning-4b | pictures, video | no | 9.4 GB, served by you (vLLM in WSL) | Apache-2.0 |
 
-All are public on Hugging Face and need no account; mms names each one's licence before it downloads. The default yes/no
-threshold is measured only for d1-Omni-2B so far; the others' are assumed, and the `ask` tool's description says which.
+All are public on Hugging Face and need no account; mms names each one's licence before it downloads. A model brings its own
+code from its Hugging Face repo, and that code runs on your machine with your rights, in the process that reads your screen and
+sound. So mms pins each model to one commit of its repo and downloads exactly that commit, never the newest: a later upload to
+the repo changes nothing here until a release of mms moves the pin. The default yes/no threshold is measured only for
+d1-Omni-2B so far; the others' are assumed, and the `ask` tool's description says which.
 
 ## Command line
 
@@ -245,7 +253,8 @@ uv run pytest
 ```
 
 runs the offline suite on four workers: no GPU, no agent, no network, and every test uses a throwaway home. GPU and agent tests
-are opt-in (`-m gpu`, `-m codex`) and described in [TESTBED.md](TESTBED.md).
+are opt-in (`-m gpu`, `-m codex`) and described in [TESTBED.md](TESTBED.md). `.github/workflows/test.yml` runs the offline suite
+on Windows for each push to main and each pull request.
 
 | Path | What |
 | --- | --- |
