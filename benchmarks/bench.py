@@ -632,9 +632,13 @@ def own_permissions(folder: Path) -> list[str]:
     if os.name != "nt":
         return []
     quoted = str(folder).replace("'", "''")
-    script = (f"Get-ChildItem -LiteralPath '{quoted}' -Recurse -File | Where-Object {{ @((Get-Acl -LiteralPath $_.FullName).Access"
+    # Stop, because a Get-Acl that fails would otherwise read as a file with nothing of its own. No PSModulePath, because a child of
+    # PowerShell 7 (GitHub's runners) inherits one whose Get-Acl Windows PowerShell cannot load.
+    script = ("$ErrorActionPreference = 'Stop'; "
+              f"Get-ChildItem -LiteralPath '{quoted}' -Recurse -File | Where-Object {{ @((Get-Acl -LiteralPath $_.FullName).Access"
               " | Where-Object { -not $_.IsInherited }).Count -gt 0 } | ForEach-Object { $_.FullName }")
-    done = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script], capture_output=True, text=True)
+    env = {name: value for name, value in os.environ.items() if name.upper() != "PSMODULEPATH"}
+    done = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script], capture_output=True, text=True, env=env)
     if done.returncode:
         raise RuntimeError(f"Get-Acl failed on {folder}: {done.stderr.strip()}")
     return [Path(line.strip()).relative_to(folder).as_posix() for line in done.stdout.splitlines() if line.strip()]
