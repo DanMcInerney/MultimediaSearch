@@ -134,8 +134,8 @@ side of the threshold; for the others it prints them. Models that hear nothing s
 
 It is opt-in, because loading takes 20-24 s for d1 and needs the GPU. Run it alone, with no other suite or GPU job going, with
 the daemon's model unloaded (`mms status` shows the decider's state), and one model at a time (H2O's server stopped when its run
-is done, to free the VRAM), only with the maintainer's go-ahead. The order for a first pass is d1-3B (the default), d1-Omni-2B
-(its identity and timings first), d1-2B, d3-edge, d3-mini, Perplexity, d3-flash (the most VRAM, 17.5 GiB), then H2O.
+is done, to free the VRAM), only with the maintainer's go-ahead. The order for a first pass is d1-Omni-2B (the default; its
+identity and timings first), d1-3B, d1-2B, d3-edge, d3-mini, Perplexity, d3-flash (the most VRAM, 17.5 GiB), then H2O.
 
 `tests/test_gpu.py` also checks, on the CPU, that each folder's `About` agrees with the weights' own numbers (for d1,
 `config.json`; for d1-3B the loaded code's picture cap is checked when it loads). The GPU tests give the same counts again after any change to a decider's code: that shows d1 is unchanged.
@@ -603,8 +603,8 @@ Each item is an end-to-end test.
     - the skill is in both skills folders, and the login entry in the Startup or autostart folder;
     - running it twice changes nothing more;
     - `--remove` undoes each step;
-    - the `model` step runs in this process, with the home in `tmp_path` and the Hub faked: a fresh install downloads d1-3B and
-      says it hears nothing; a model that is configured stays, with no call to the Hub, and a `--models-dir` without
+    - the `model` step runs in this process, with the home in `tmp_path` and the Hub faked: a fresh install downloads d1-Omni-2B;
+      a model named that hears nothing says so; a model that is configured stays, with no call to the Hub, and a `--models-dir` without
       `--model` then fails the step; `--model` with `--models-dir` downloads there; mms's own env missing a pin fails the step, with why, before any download; `--remove` keeps the weights
       and the setting and says so; `--model` with `--remove`, or without the model step, is a usage error;
     - nothing outside `tmp_path` is written;

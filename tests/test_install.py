@@ -451,16 +451,24 @@ def install_model(capsys, *args: str) -> tuple[int, list[str], str]:
 
 def test_the_steps_end_with_the_model_and_then_the_daemon():
     assert install.STEPS == ("claude", "codex", "skills", "login", "model", "daemon")
-    assert install.DEFAULT_MODEL == "d1-3B"
+    assert install.DEFAULT_MODEL == "d1-Omni-2B"
 
 
-def test_a_fresh_install_downloads_d1_3b_and_says_it_hears_nothing(modelling, hub, capsys):
-    folder = modelling / "models" / "d1-3B"
+def test_a_fresh_install_downloads_d1_omni_2b_and_has_nothing_to_say_about_hearing(modelling, hub, capsys):
+    folder = modelling / "models" / "d1-Omni-2B"
     code, out, err = install_model(capsys)
     assert code == 0
+    assert out == [f"model: done (d1-Omni-2B in {folder})"]
+    assert hub.calls == [("info", "LiquidAI/d1-Omni-2B"), ("download", "LiquidAI/d1-Omni-2B", folder, hub.commit)]
+    assert "downloading LiquidAI/d1-Omni-2B at 0000000 (6.3 GB, licence lfm1.0) into" in err, "the work's output is on stderr"
+    assert configuration.load(modelling).decider_model == folder.as_posix()
+
+
+def test_a_model_named_that_hears_nothing_says_so_and_names_the_one_that_hears(modelling, hub, capsys):
+    folder = modelling / "models" / "d1-3B"
+    code, out, err = install_model(capsys, "--model", "d1-3B")
+    assert code == 0
     assert out == [f"model: done (d1-3B in {folder}; it hears nothing: mms model use d1-Omni-2B gives one that hears)"]
-    assert hub.calls == [("info", "LiquidAI/d1-3B"), ("download", "LiquidAI/d1-3B", folder, hub.commit)]
-    assert "downloading LiquidAI/d1-3B at 0000000 (6.3 GB, licence lfm1.0) into" in err, "the work's output is on stderr"
     assert configuration.load(modelling).decider_model == folder.as_posix()
 
 
@@ -469,7 +477,7 @@ def test_a_model_that_is_configured_stays_and_nothing_is_asked_of_the_hub(modell
     hub.calls.clear()
     before = (modelling / "mms.toml").read_bytes()
     code, out, err = install_model(capsys)
-    configured = (modelling / "models" / "d1-3B").as_posix()
+    configured = (modelling / "models" / "d1-Omni-2B").as_posix()
     assert code == 0 and err == ""
     assert out == [f"model: unchanged (the configured model stays ({configured}); mms model use NAME switches)"]
     assert hub.calls == [] and (modelling / "mms.toml").read_bytes() == before
@@ -487,7 +495,7 @@ def test_a_models_dir_with_a_model_configured_and_no_model_named_fails_the_step_
 
 
 def test_a_model_named_and_a_models_folder_given_are_downloaded_there_and_used(modelling, hub, tmp_path, capsys):
-    assert install_model(capsys)[0] == 0  # d1-3B is configured
+    assert install_model(capsys, "--model", "d1-3B")[0] == 0  # another model is configured
     hub.calls.clear()
     folder = tmp_path / "big" / "d1-Omni-2B"
     code, out, err = install_model(capsys, "--model", "d1-Omni-2B", "--models-dir", str(tmp_path / "big"))
@@ -503,7 +511,7 @@ def test_a_model_that_cannot_be_used_fails_the_step_with_why_and_the_hub_is_not_
     monkeypatch.setattr(modelenv, "installed", dict)  # mms's own env holds nothing
     code, out, err = install_model(capsys)
     assert code == 1 and len(out) == 1
-    assert out[0].startswith("model: failed (d1-3B runs in mms's own env, which is not ready: ")
+    assert out[0].startswith("model: failed (d1-Omni-2B runs in mms's own env, which is not ready: ")
     assert "uv sync --group d1" in out[0]
     assert hub.calls == [] and not (modelling / "mms.toml").exists() and not (modelling / "models").exists()
     code, out, err = install_model(capsys, "--model", "nope")
@@ -516,10 +524,10 @@ def test_removing_leaves_the_weights_and_the_setting_and_says_so(modelling, hub,
     assert install_model(capsys)[0] == 0
     before = (modelling / "mms.toml").read_bytes()
     code, out, err = install_model(capsys, "--remove")
-    configured = (modelling / "models" / "d1-3B").as_posix()
+    configured = (modelling / "models" / "d1-Omni-2B").as_posix()
     assert code == 0 and out == [f"model: unchanged ({configured} stays configured and its weights stay on disk: delete its "
                                  "folder by hand to free the space)"]
-    assert (modelling / "models" / "d1-3B" / "model.safetensors").is_file()
+    assert (modelling / "models" / "d1-Omni-2B" / "model.safetensors").is_file()
     assert (modelling / "mms.toml").read_bytes() == before
 
 

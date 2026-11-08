@@ -41,7 +41,7 @@ dev = [
     "pytest>=8",
     "pytest-xdist>=3.8.0",
 ]
-# d1-3B (the default), d1-Omni-2B and d1-2B on the GPU, in mms's own env: `uv sync --group d1`
+# d1-Omni-2B (the default), d1-3B and d1-2B on the GPU, in mms's own env: `uv sync --group d1`
 # transformers is pinned to 5.21.0: 5.22.1 passes **kwargs (sliding_window) on to d1's `_lfm2_conv`, which takes none
 d1 = [
     "torch",

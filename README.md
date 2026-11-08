@@ -8,13 +8,12 @@
 
 MultimediaSearch (`mms`) records what you choose on your own machine: the screen, a microphone, cameras, folders of files, notes and
 program logs. When your coding agent has a question about the past, a small multimodal model running on your own GPU looks at,
-or listens to, the raw recordings and returns the moments that match. The default model sees; `mms model use d1-Omni-2B`
-switches to one that also hears.
+or listens to, the raw recordings and returns the moments that match.
 
 Your agent can answer questions like:
 
 - "When did I last have the CUDA error on screen?"
-- "Did anyone ring the doorbell this afternoon?" (with a model that hears)
+- "Did anyone ring the doorbell this afternoon?"
 - "What did my notes say about the retention rule on Tuesday?"
 
 It gets back the moments that match, each with a confidence and a handle it can open to check the frame, sound or file itself.
@@ -47,7 +46,7 @@ the same files and their own tools, and used fewer tokens and less time per ques
 
 This is one pilot run, and the gains are not yet statistically significant. On real first-person video with transcripts
 (EgoLifeQA), mms did no better than the files: 34/40 with mms against 36/40 without, at about twice the tokens per correct
-answer. [benchmarks/](benchmarks/README.md) has the method, the caveats, and four questions traced side by side.
+answer. Both ran on d1-3B, the default at the time, which does not hear. [benchmarks/](benchmarks/README.md) has the method, the caveats, and four questions traced side by side.
 
 ## How it works
 
@@ -85,7 +84,7 @@ answer: one observable thing, with the time range in `since` and `until`, never 
 - Windows 11, where mms is developed and tested. Linux capture (x11grab, PulseAudio, v4l2) and login start are implemented but
   untested. macOS is not supported.
 - Python 3.12 and [uv](https://docs.astral.sh/uv/).
-- An NVIDIA GPU that runs PyTorch's CUDA 12.8 builds, with room for the model: the default, d1-3B, is a 6.3 GB download.
+- An NVIDIA GPU that runs PyTorch's CUDA 12.8 builds, with room for the model: the default, d1-Omni-2B, is a 4.4 GB download.
 - Claude Code, Codex, or both.
 - ffmpeg is optional: mms uses the one on your PATH, else the binary that `imageio-ffmpeg` installs.
 
@@ -114,7 +113,7 @@ uv run mms install
    device, lower a cap or delete history);
 3. `skills`: copies the `mms-questions` skill to both agents;
 4. `login`: starts the daemon at each login;
-5. `model`: downloads the default model, d1-3B, naming its licence first, and configures it;
+5. `model`: downloads the default model, d1-Omni-2B, naming its licence first, and configures it;
 6. `daemon`: starts the daemon now.
 
 It changes only what is mms's, and refuses to overwrite anything else of the same name. `mms install --only <step>` reruns one
@@ -122,14 +121,6 @@ step.
 
 `mms` is installed in the clone's `.venv`, not on your PATH: run it as `uv run mms ...` from the clone, or activate `.venv`. The
 agents find it without either.
-
-### Hearing
-
-d1-3B sees but does not hear. For questions about sound, switch to the model that hears:
-
-```bash
-uv run mms model use d1-Omni-2B
-```
 
 ### Uninstall
 
@@ -171,7 +162,7 @@ reloads it.
 free_gb = 20                 # the floor: below it, recording stops until 1 GB above it
 
 [decider]
-model = "~/.mms/models/d1-3B"        # set by mms install and mms model use
+model = "~/.mms/models/d1-Omni-2B"   # set by mms install and mms model use
 idle_s = 600                         # unload the model after this long with no question
 
 [sources.screen]
@@ -221,8 +212,8 @@ d3 and Perplexity get one of their own, which `mms model use` builds; H2O is a s
 
 | Model | Sees | Hears | Download | Licence |
 | --- | --- | --- | --- | --- |
-| **d1-3B** (default) | pictures, video | no | 6.3 GB | LFM 1.0 |
-| d1-Omni-2B | pictures, video | yes | 4.4 GB | LFM 1.0 |
+| **d1-Omni-2B** (default) | pictures, video | yes | 4.4 GB | LFM 1.0 |
+| d1-3B | pictures, video | no | 6.3 GB | LFM 1.0 |
 | d1-2B | pictures, video | no | 3.9 GB | LFM 1.0 |
 | d3-edge, d3-mini, d3-flash | pictures, video | no | 1.2, 9.1, 16.8 GB | Apache-2.0 |
 | pplx-decider-flash-v1.2 | pictures, video | no | 9.1 GB | Apache-2.0 |
