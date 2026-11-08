@@ -25,7 +25,7 @@ SERVER = "mms"  # the name the adapter is registered under
 SKILL = "mms-questions"
 SKILL_SOURCE = Path(__file__).parent / "skills" / SKILL
 STEPS = ("claude", "codex", "skills", "login", "model", "daemon")
-DEFAULT_MODEL = "d1-3B"  # what a fresh install downloads and uses: a model must be set, and mms ships no weights
+DEFAULT_MODEL = "d1-Omni-2B"  # what a fresh install downloads and uses: a model must be set, and mms ships no weights
 # Codex asks before every MCP tool call unless the server's tools are approved, and `codex exec` refuses them outright.
 # mms's tools can neither approve a device, lower a cap nor delete history (DESIGN §4.3, §4.4), so they are approved.
 APPROVAL, APPROVE = "default_tools_approval_mode", "approve"
@@ -201,7 +201,7 @@ def skills(remove: bool) -> tuple[str, str]:
 
 
 def model(remove: bool, name: str | None, models: str | None) -> tuple[str, str]:
-    """Download and configure the decision model (`mms model use`): `name`, else d1-3B when none is configured. A model that
+    """Download and configure the decision model (`mms model use`): `name`, else DEFAULT_MODEL when none is configured. A model that
     is configured stays unless `name` is given. Removing keeps the weights and the setting. The work prints to stderr, so
     stdout stays one line per step."""
     home = configuration.default_home()

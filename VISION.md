@@ -31,7 +31,7 @@ It gets back pointers to the moments that match, and looks at them before trusti
 2. **The raw record is the memory.** Nothing is summarised or extracted at write time. Text, labels and indexes are
    pointers back to it.
 3. **Bounded disk.** The owner sets limits per source and a free-space floor, and they hold.
-4. **Questions by time.** Answers come from a local decision model (d1-3B by default, which `mms install` downloads; seven
+4. **Questions by time.** Answers come from a local decision model (d1-Omni-2B by default, which `mms install` downloads; seven
    others swap in with `mms model use`, which downloads them) reading the record in the requested range, and say "not found"
    when nothing matches.
 5. **Future-proof.** A better model makes the memory better with no change to what is stored.
@@ -53,8 +53,8 @@ It gets back pointers to the moments that match, and looks at them before trusti
 - **Is the d1 scan good enough?** Against plain text search over transcripts and OCR, on real history, for recall,
   false hits and seconds per day.
 - **Speech.** d1 is weak on long speech; how much should transcripts carry?
-- **One model or two.** The default, d1-3B, hears nothing, and only d1-Omni-2B hears: sound needs `mms model use d1-Omni-2B`.
-  Is one model enough, or should one that reads pictures better run beside d1-Omni-2B, kept for sound? Eight models swap in
+- **One model or two.** The default, d1-Omni-2B, is the only one that hears.
+  Is one model enough, or should one that reads pictures better run beside it, kept for sound? Eight models swap in
   now, one loaded at a time. DESIGN.md §13.3 gives the path to two (`[decider] sound`); a bake-off of the eight on this laptop
   is what decides.
 - **Screen as video or as pictures.** Video is the plan; whether it costs d1 accuracy is unmeasured.
@@ -64,8 +64,8 @@ It gets back pointers to the moments that match, and looks at them before trusti
 - Research done, 30 and 31 October (the notes are kept outside the repository).
 - Prototype v0 is built.
 - Design C (DESIGN.md) is built: one daemon, MCP and CLI faces, program logs through a spool. It has run in real Claude Code and Codex sessions in the benchmark ([benchmarks/](benchmarks/README.md)).
-- The decision model is swappable between eight models in five families, each in a process of its own: d1-3B (the default),
-  d1-Omni-2B and d1-2B, d3 (edge, mini, flash), Perplexity Decider Flash, and H2O-Lightning-4B (a server the owner runs in
+- The decision model is swappable between eight models in five families, each in a process of its own: d1-Omni-2B (the default),
+  d1-3B and d1-2B, d3 (edge, mini, flash), Perplexity Decider Flash, and H2O-Lightning-4B (a server the owner runs in
   WSL). `mms install` downloads the default and `mms model use` any other: there are no weights in the repo. Only d1-Omni-2B's
   default `hit` is measured. All eight have run on this laptop's GPU and their costs are measured; the other `hit`s stay
   assumed until the rest of the bake-off (DESIGN.md §13.3, §16).
@@ -91,3 +91,4 @@ It gets back pointers to the moments that match, and looks at them before trusti
   is the front page.
 - **7 November 2026:** the project is renamed from Multimem to MultimediaSearch, with the short name `mms` for the package,
   the command, the MCP server, `~/.mms` and `MMS_*`.
+- **8 November 2026:** d1-Omni-2B, the one model that hears, is the default in place of d1-3B. `mms install` downloads it.

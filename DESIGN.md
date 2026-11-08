@@ -5,7 +5,7 @@ research behind it (a survey, a storage plan, and how to cut and store for d1) i
 what it settled.
 
 This is the spec of **design C**, as built: agents attach by MCP alone, one daemon per home owns the decider's queue and
-everything that writes, the decision model runs in a process of its own (d1-3B by default, which `mms install` downloads;
+everything that writes, the decision model runs in a process of its own (d1-Omni-2B by default, which `mms install` downloads;
 §13.3 has the eight models that swap in), and programs log through a spool. §17 lists the files and what comes next.
 
 ## 1. Principles
@@ -1164,9 +1164,9 @@ reads them on the CPU and loads nothing).
 
 | Model (`About.name`) | Claimed by | Runs | Reads | Types | Keys | Per pass |
 | --- | --- | --- | --- | --- | --- | --- |
-| d1-Omni-2B | `config.json` with the five `d1_*` keys and `model_type` `lfm3_omni` | worker, mms's own env | pictures, video, sound | all 8 | all 5 | 16 |
+| **d1-Omni-2B** (the default) | `config.json` with the five `d1_*` keys and `model_type` `lfm3_omni` | worker, mms's own env | pictures, video, sound | all 8 | all 5 | 16 |
 | d1-2B | the same keys and `model_type` `lfm3_vl` | worker, mms's own env | pictures, video | all 8 | all 5 | 16 |
-| **d1-3B** (the default) | `config.json` with `model_type` `lfm2_vl`, `auto_map` `AutoModel` `modeling_d1.D1Model` and a `text_config` of hidden size 2048 and 30 layers | worker, mms's own env | pictures, video | noul, choice, score | criteria | any number |
+| d1-3B | `config.json` with `model_type` `lfm2_vl`, `auto_map` `AutoModel` `modeling_d1.D1Model` and a `text_config` of hidden size 2048 and 30 layers | worker, mms's own env | pictures, video | noul, choice, score | criteria | any number |
 | d3-edge, d3-mini, d3-flash | `decision_config.json` with `format_id` `d3-code-readout-v1`, and a `MODEL_MANIFEST.json` whose `model_name` is one of the three | worker, `envs/d3` | pictures, video | noul, choice, score | criteria | 1 |
 | pplx-decider-flash-v1.2 (Perplexity Decider Flash) | `joint_config.json` of version 3 with template `joint-question-inline-readout-v1`, and `source/src/pplx_decider/` | worker, `envs/pplx` | pictures, video | noul, choice, score | criteria | 1 |
 | h2o-lightning-4b | `serve_config.json` for `h2oai/h2o-lightning-4b`, and `h2o_lightning_shim.py` | the owner's vLLM server in WSL, at a loopback URL | pictures, video | noul, choice, score, box | criteria | 1 |
@@ -1422,8 +1422,8 @@ in mms changes. A model with an env of its own makes its `Worker` from
   (the heavy half is a worker file, run in the model's own env); a missing optional package must not break the folders of
   other models.
 
-**One model at a time, and a second for sound later.** The default is deaf: a microphone is unread until
-`mms model use d1-Omni-2B`. VRAM is 24 GB, so there is no reason yet to load two. When a deaf model should be joined by one
+**One model at a time, and a second for sound later.** The default, d1-Omni-2B, is the one model that hears: with any
+other, a microphone is unread. VRAM is 24 GB, so there is no reason yet to load two. When a deaf model should be joined by one
 that hears, the path needs no rewrite: `[decider] sound = "<folder>"`; the queue
 holding a worker for each role (they are processes, so either can be killed alone); `job.about()` composing one `About` (the
 union of what they read, the sound model's rate and sound cost, the types both answer); and `job.decide` choosing the decider
@@ -1461,10 +1461,10 @@ and the limits and defaults of its parameters. It reads the model's facts from `
 - **Model:** the step is `mms model use` (`prepare.switch`, §13.3), and runs before the daemon, which then starts with a
   model. With `--model` it downloads and configures that model (a name mms knows, or a folder). With none, a model that is
   already configured stays (`unchanged`, saying `mms model use NAME` switches), so running `mms install` again never changes the
-  owner's choice; with none configured it downloads and uses d1-3B (`DEFAULT_MODEL`), as mms ships no weights. `--models-dir`
+  owner's choice; with none configured it downloads and uses d1-Omni-2B (`DEFAULT_MODEL`), as mms ships no weights. `--models-dir`
   says where the folder goes (default: the configured model's folder, else `<home>/models`); with a model configured and no
   `--model`, nothing is downloaded, so it fails the step rather than being ignored. The licence is named before the
-  download (§13.3), with no prompt. d1-3B hears nothing, so the line says so and names `mms model use d1-Omni-2B`. The work
+  download (§13.3), with no prompt. For a model that hears nothing, the line says so and names `mms model use d1-Omni-2B`. The work
   prints to stderr, so stdout keeps one line per step. A failure (mms's own env not ready, no room, a folder that is someone
   else's, a download that stopped) is this step's `failed (<why>)`, and the other steps go on. `--model` or `--models-dir`
   with `--remove`, or with an `--only` that leaves out `model`, is a usage error (exit 2). `--remove` keeps the weights and

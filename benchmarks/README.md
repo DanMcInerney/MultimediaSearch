@@ -9,7 +9,7 @@ Each question is asked twice, once per arm, in a fresh agent session each time:
   agent uses its own tools. Claude Code has Read, Glob, Grep and Bash for ffmpeg. Codex has its shell (in its Windows sandbox) and
   `view_image`.
 - **With mms:** the same recordings are loaded into an mms store. The agent has only mms's tools (`ask`, `find`, `look`, `label`),
-  plus mms's skill and the model's notes. `ask` has a small local model (d1-3B by default) read the windows of a time range on
+  plus mms's skill and the model's notes. `ask` has a small local model (d1-3B in these runs) read the windows of a time range on
   the GPU, newest first, until it has found what was asked for or its time is up, and return the moments that match.
 
 Answers are graded by fixed rules (`grade.py`: numbers, codes, times within a tolerance), not by another model.
@@ -71,7 +71,7 @@ both faults.
 
 ### What was not tested
 
-- **Sound.** d1-3B, mms's default model, does not hear. The 7 sound questions (doorbell, smoke alarm) ran without mms only: Codex
+- **Sound.** d1-3B, mms's default model when this ran, does not hear. The 7 sound questions (doorbell, smoke alarm) ran without mms only: Codex
   5/7, Claude 5/7. `d1-Omni-2B` hears, and was not in this run.
 - **Other decision models.** Only d1-3B. The harness runs any of mms's eight (`--models`).
 
