@@ -471,6 +471,8 @@ def test_every_data_file_is_left_with_the_permissions_its_folder_gives_so_codexs
         (data / "notes").mkdir()
         (work / "moved.mkv").write_bytes(b"x")
         shutil.move(str(work / "moved.mkv"), str(data / "screen" / "moved.mkv"))
+        # whether a moved file reports permissions of its own depends on the machine (GitHub's runners: none), so it is given them
+        subprocess.run(["icacls", str(data / "screen" / "moved.mkv"), "/inheritance:r", "/grant:r", "*S-1-3-4:F"], check=True, capture_output=True)
         (work / "made.mkv").write_bytes(b"y")
         hm._finish(work / "made.mkv", data / "screen" / "made.mkv")
         (data / "notes" / "note.md").write_text("n", encoding="utf-8")
