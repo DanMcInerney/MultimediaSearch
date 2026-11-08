@@ -6,11 +6,13 @@ from __future__ import annotations
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 import time
 
-from conftest import Api, env, fake_ffmpeg, mms, wait_for, write_config
+import pytest
+from conftest import Api, approve_hint, env, fake_ffmpeg, mms, wait_for, write_config
 
 from mms import ops
 from mms.store import Store
@@ -29,6 +31,16 @@ def test_daemon_json_appears_once_the_api_answers_and_goes_at_a_clean_stop(home,
     assert not list(home.glob("daemon.json.part"))
     assert one.stop() == 0
     assert not (home / "daemon.json").exists()
+
+
+@pytest.mark.skipif(os.name != "posix", reason="file modes are POSIX's; Linux is where the daemon is not yet tried")
+def test_on_posix_the_home_and_what_the_daemon_writes_are_the_owners_alone(home, daemon):
+    write_config(home, "[memory]\nloop_s = 0.1\n")
+    home.chmod(0o755)
+    daemon()
+    assert stat.S_IMODE(home.stat().st_mode) == 0o700
+    for name in ("daemon.json", "index.sqlite"):
+        assert stat.S_IMODE((home / name).stat().st_mode) & 0o077 == 0, f"{name} is the owner's alone"
 
 
 def test_a_call_without_the_token_is_unauthorized(home, served):
@@ -65,7 +77,7 @@ def test_status_gives_its_documented_shape(home, served, tmp_path):
     assert by_name["notes"]["kind"] == "folder" and by_name["notes"]["keep"] == {
         "max_gb": 5, "when_full": "thin", "max_days": None}
     assert {"state", "project", "bytes", "items", "records", "newest"} <= set(by_name["notes"])
-    assert by_name["mic"]["state"] == "needs_approval" and by_name["mic"]["approve"] == "mms approve mic"
+    assert by_name["mic"]["state"] == "needs_approval" and by_name["mic"]["approve"] == approve_hint("mic")
     assert "devices" not in status
 
 

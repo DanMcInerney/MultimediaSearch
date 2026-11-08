@@ -280,7 +280,6 @@ class Capture:
         ones start at the next step, and the rest are left alone. Only what ffmpeg runs counts as a change: a cap or a
         project does not restart a source."""
         wanted = {name: source for name, source in config.sources.items() if source.kind in KINDS}
-        consent.prune(config.home, {name for name, source in config.sources.items() if source.what() is not None})
         approved = {name: consent.approved(config.home, name, source.what()) for name, source in wanted.items()}
         ffmpeg = ffmpeg_exe(config)
 

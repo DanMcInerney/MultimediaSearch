@@ -1,7 +1,7 @@
-"""`mms start` (DESIGN.md §10): one daemon per home. It takes the lock, reads the config (a bad file gives no sources and a
-`config_error`), opens the store, runs the janitor's pass and capture's reconcile, starts the API and writes `daemon.json`,
-then loops: it reloads `mms.toml` and `consent.json` when they change, steps capture and ingest, runs the janitor
-and sweeps jobs. It stops when `mms stop` writes `daemon.stop`, or on Ctrl+C. Its children die with it (children.py).
+"""`mms start` (DESIGN.md §10): one daemon per home. It takes the lock, reads the config (a bad `mms.toml` or `consent.json`
+gives no sources and a `config_error`), opens the store, runs the janitor's pass and capture's reconcile, starts the API and
+writes `daemon.json`, then loops: it reloads `mms.toml` and `consent.json` when they change, steps capture and ingest, runs the
+janitor and sweeps jobs. It stops when `mms stop` writes `daemon.stop`, or on Ctrl+C. Its children die with it (children.py).
 """
 
 from __future__ import annotations
@@ -27,6 +27,7 @@ STOP, LOG = "daemon.stop", "daemon.log"
 REPEAT_S = 60.0  # a step that keeps failing the same way is logged this often
 START_WAIT_S = 2.0  # a starting daemon waits this long for the lock: a probe or a daemon that is stopping holds it
 DETACH_WAIT_S = 30.0  # `mms start --detach` waits this long for the daemon to answer
+PRUNE_QUIET_S = 3.0  # approvals of sources that are gone are dropped once both files have stood still this long (§4.3)
 
 
 class LogFile:
@@ -75,6 +76,7 @@ class Daemon:
         self.pid = os.getpid()
         self.started = 0.0
         self.paused = False
+        self.prune_at: float | None = None  # when the approvals of sources that are gone are next dropped; None: not due
 
     # what the ops ask of a running daemon (ops.Env.live)
 
@@ -101,6 +103,9 @@ class Daemon:
     def run(self) -> int:
         """Run until stopped; returns the exit code."""
         self.home.mkdir(parents=True, exist_ok=True)
+        if os.name == "posix":  # the token and the recordings are the owner's alone: what is made here is 600, the home 700
+            os.umask(0o077)
+            self.home.chmod(0o700)
         if self.detached:
             sys.stdout = sys.stderr = LogFile(self.home / LOG)
         logging.basicConfig(level=logging.INFO, format="%(name)s: %(message)s", stream=sys.stdout)
@@ -139,6 +144,8 @@ class Daemon:
             config, config_error = Config(home=self.home), str(error)
             log(f"{error}: running with no sources until it is fixed")
         self.stamps = _stamp(self.home)
+        if config_error is None:
+            self.prune_at = time.time() + PRUNE_QUIET_S
         store = Store(self.home)
         from mms.capture import Capture
         from mms.gpu import Gpu
@@ -165,7 +172,8 @@ class Daemon:
             next_janitor = self.started + config.janitor_s
             while not self.stopping and not (self.home / STOP).exists():
                 now = time.time()
-                config = self.reload(config)
+                config = self.guard("reload", self.reload, config) or config
+                self.guard("consent prune", self.prune_when_due, now)
                 self.guard("capture", self.capture.step, now)
                 if not self.paused:
                     self.guard("ingest", self.ingest.step, now)
@@ -204,12 +212,25 @@ class Daemon:
             log(f"{error}: keeping the last good config")
             return config
         self.env.config, self.env.config_error = new, None
+        self.prune_at = time.time() + PRUNE_QUIET_S
         for name, part in (("capture", self.capture), ("ingest", self.ingest), ("janitor", self.janitor),
                            ("gpu", self.gpu)):
             self.guard(f"{name} apply", part.apply, new)
         self.jobs.apply()
         log(f"config reloaded: {len(new.sources)} sources")
         return new
+
+    def prune_when_due(self, now: float) -> None:
+        """Drop the approvals of names that are not a source that needs one (DESIGN.md §4.3), once `mms.toml` and
+        `consent.json` have stood still for PRUNE_QUIET_S, against the config last read, and only while both are good. A file
+        that is empty or missing, or half written and still parses, is a config with no sources for a moment, and pruning
+        then would take every approval: an editor that truncates and then writes is caught by the next poll. One path for
+        the start and for each reload."""
+        if self.prune_at is None or now < self.prune_at or self.env.config_error is not None:
+            return
+        names = {name for name, source in self.env.config.sources.items() if source.what() is not None}
+        consent.prune(self.home, names)
+        self.prune_at = None  # after it worked: a failure is tried again at the next poll
 
     def hold(self, paused: bool) -> None:
         """The floor: capture pauses and ingest stops (its commands end, and its watches pick up where their cursors

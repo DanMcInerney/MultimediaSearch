@@ -4,6 +4,7 @@ replaced by `FakeHub`, and `_hub` is tried on a fake `huggingface_hub` module.""
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import logging
 import os
@@ -21,7 +22,7 @@ from mms import decider, decider_d1_3b, fetch
 
 ABOUT = decider_d1_3b.ABOUT
 REPO = "LiquidAI/d1-3B"
-COMMIT = "bee5e87" + "9" * 33  # what the fake Hub says the repo is at
+COMMIT = ABOUT.commit  # what the model pins: the only commit asked for and downloaded
 HTTP_LOG = "huggingface_hub.utils._http"  # the logger of the Hub's warnings
 
 
@@ -132,9 +133,9 @@ def test_a_download_says_the_size_and_licence_before_it_starts_and_asks_the_hub_
 
     hub.arrive = arrive
     fetch.download(ABOUT, folder)
-    assert said == [f"downloading {REPO} at 0000000 (6.3 GB, licence lfm1.0) into {folder}; if it stops, the same command "
-                    "downloads what is still missing, and a file cut off part-way starts again\n"]
-    assert hub.calls == [("info", REPO), ("download", REPO, folder, hub.commit)]
+    assert said == [f"downloading {REPO} at {COMMIT[:7]} (6.3 GB, licence lfm1.0) into {folder}; if it stops, the same "
+                    "command downloads what is still missing, and a file cut off part-way starts again\n"]
+    assert hub.calls == [("info", REPO, COMMIT), ("download", REPO, folder, COMMIT)]
     assert re.fullmatch(r"downloaded d1-3B in \d+\.\d min\n", capsys.readouterr().out)
     assert fetch.ready(ABOUT, folder)
 
@@ -145,13 +146,13 @@ def test_a_licence_the_hub_does_not_state_is_said_so(tmp_path, hub, capsys):
     assert " (6.3 GB, licence not stated: read its LICENSE) " in capsys.readouterr().out
 
 
-def test_the_commit_the_size_was_checked_at_is_the_one_downloaded_and_the_line_names_it_short(tmp_path, hub, capsys):
-    hub.commit = "bee5e87" + "1" * 33
+def test_the_commit_the_about_pins_is_the_one_asked_about_and_downloaded_and_the_line_names_it_short(tmp_path, hub, capsys):
+    pinned = dataclasses.replace(ABOUT, commit="bee5e87" + "1" * 33)
     folder = tmp_path / "d1-3B"
-    fetch.download(ABOUT, folder)
-    assert hub.calls == [("info", REPO), ("download", REPO, folder, hub.commit)]
+    fetch.download(pinned, folder)
+    assert hub.calls == [("info", REPO, pinned.commit), ("download", REPO, folder, pinned.commit)]
     said = capsys.readouterr().out
-    assert f"downloading {REPO} at bee5e87 (" in said and hub.commit not in said
+    assert f"downloading {REPO} at bee5e87 (" in said and pinned.commit not in said
 
 
 def test_an_empty_folder_and_a_download_that_stopped_are_downloaded_into(tmp_path, hub):
@@ -211,7 +212,7 @@ def test_this_model_unfinished_is_resumed(tmp_path, hub):
     (folder / "model.safetensors").unlink()
     assert not fetch.ready(ABOUT, folder)
     fetch.download(ABOUT, folder)
-    assert hub.calls == [("info", REPO), ("download", REPO, folder, hub.commit)]
+    assert hub.calls == [("info", REPO, COMMIT), ("download", REPO, folder, COMMIT)]
     assert fetch.ready(ABOUT, folder)
 
 
@@ -246,7 +247,7 @@ def test_too_little_free_space_is_refused_after_asking_the_size_and_before_downl
     with pytest.raises(fetch.FetchError, match=re.escape(f"{REPO} is 6.3 GB and ") + r".* has 6\.0 GB free: free some space "
                                                "or give another --dir"):
         fetch.download(ABOUT, tmp_path / "models" / "d1-3B")
-    assert hub.calls == [("info", REPO)], "the size is asked, nothing is downloaded"
+    assert hub.calls == [("info", REPO, COMMIT)], "the size is asked, nothing is downloaded"
     assert not (tmp_path / "models").exists(), "nothing is made either"
 
 
@@ -307,7 +308,7 @@ def test_the_floor_of_mms_is_kept_free_when_it_is_asked_for(tmp_path, hub):
             f"{REPO} is 6.3 GB and ") + r".* has 26\.0 GB free: downloading it would leave 19\.7 GB free, under "
             r"\[memory\] free_gb \(20 GB\), which pauses capture: free some space or give another --dir"):
         fetch.download(ABOUT, folder, keep_free=20_000_000_000)
-    assert hub.calls == [("info", REPO)] and not folder.exists()
+    assert hub.calls == [("info", REPO, COMMIT)] and not folder.exists()
     hub.free = 26_300_000_000  # exactly the floor is left
     fetch.download(ABOUT, folder, keep_free=20_000_000_000)
     assert fetch.ready(ABOUT, folder)
@@ -345,7 +346,7 @@ def test_a_download_that_leaves_a_file_of_the_hubs_record_missing_is_not_ready_a
                                   "tokenizer.json": 100})
     assert not fetch.ready(ABOUT, folder) and "tokenizer.json" in fetch.unfinished(folder)
     fetch.download(ABOUT, folder)
-    assert hub.calls == [("info", REPO), ("download", REPO, folder, hub.commit)]
+    assert hub.calls == [("info", REPO, COMMIT), ("download", REPO, folder, COMMIT)]
     assert fetch.ready(ABOUT, folder), "the fake hub's download writes the record of what it left"
 
 
@@ -368,7 +369,7 @@ KEYS = tuple(fetch.HUB_ENV)
 def fake_module(monkeypatch, quiet: bool = True, **parts) -> list:
     """A `huggingface_hub` in sys.modules that records each call with the switches in force when it was made. The switches
     are set to "0" first, so that the test sees them turned on and its environment is restored afterwards. `sha` is the
-    commit the repo is said to be at (None: none given), and `arrive` is called with the folder a download is into. The
+    commit the repo is said to be at (default: the one asked for; None: none given), and `arrive` is called with the folder a download is into. The
     Hub's logger has no filters for the test, and its own again after."""
     for key in KEYS:
         monkeypatch.setenv(key, "0")
@@ -403,19 +404,19 @@ def fake_module(monkeypatch, quiet: bool = True, **parts) -> list:
     return seen
 
 
-def test_the_hub_is_asked_for_the_size_licence_and_commit_with_no_token_and_the_switches_on(monkeypatch):
+def test_the_hub_is_asked_for_the_size_and_licence_at_the_commit_with_no_token_and_the_switches_on(monkeypatch):
     seen = fake_module(monkeypatch)
-    assert fetch.hub_info(REPO) == (7_000, "lfm1.0", COMMIT), "the sizes the hub gives, a missing one as 0"
+    assert fetch.hub_info(REPO, COMMIT) == (7_000, "lfm1.0"), "the sizes the hub gives, a missing one as 0"
     [(call, repo, kwargs, switches)] = seen
-    assert (call, repo, kwargs) == ("model_info", REPO, {"files_metadata": True, "token": False})
+    assert (call, repo, kwargs) == ("model_info", REPO, {"revision": COMMIT, "files_metadata": True, "token": False})
     assert switches == dict.fromkeys(KEYS, "1"), "every switch is on when the hub is first used"
 
 
 def test_a_licence_is_its_name_else_its_id_else_none(monkeypatch):
     fake_module(monkeypatch, card=types.SimpleNamespace(license_name=None, license="apache-2.0"))
-    assert fetch.hub_info(REPO)[1] == "apache-2.0"
+    assert fetch.hub_info(REPO, COMMIT)[1] == "apache-2.0"
     fake_module(monkeypatch, card=None)
-    assert fetch.hub_info(REPO)[1] is None
+    assert fetch.hub_info(REPO, COMMIT)[1] is None
 
 
 def test_a_download_is_of_the_commit_given_into_the_folder_given_with_no_token_and_the_switches_on(monkeypatch, tmp_path):
@@ -427,22 +428,22 @@ def test_a_download_is_of_the_commit_given_into_the_folder_given_with_no_token_a
     assert switches == dict.fromkeys(KEYS, "1")
 
 
-def test_a_download_asks_the_hub_for_the_commit_the_size_was_checked_at_and_never_for_a_branch(monkeypatch, tmp_path):
+def test_a_download_asks_the_hub_for_the_commit_the_about_pins_both_times_and_never_for_a_branch(monkeypatch, tmp_path):
     seen = fake_module(monkeypatch, arrive=FakeHub.write_model)
     monkeypatch.setattr(fetch.shutil, "disk_usage", lambda path: types.SimpleNamespace(free=10**12))
     fetch.download(ABOUT, tmp_path / "d1-3B")
-    [(info, _, _, _), (download, _, kwargs, _)] = seen
+    [(info, _, asked, _), (download, _, kwargs, _)] = seen
     assert (info, download) == ("model_info", "snapshot_download")
-    assert kwargs["revision"] == COMMIT and kwargs["revision"] != "main"
+    assert asked["revision"] == kwargs["revision"] == ABOUT.commit != "main"
 
 
-@pytest.mark.parametrize("sha", [None, ""])
-def test_a_hub_that_gives_no_commit_is_an_error_and_nothing_is_downloaded(monkeypatch, tmp_path, sha):
+@pytest.mark.parametrize("sha, said", [(None, "none"), ("", "none"), ("f" * 40, "f" * 40)])
+def test_a_hub_that_answers_at_another_commit_or_none_is_an_error_and_nothing_is_downloaded(monkeypatch, tmp_path, sha, said):
     seen = fake_module(monkeypatch, sha=sha)
     monkeypatch.setattr(fetch.shutil, "disk_usage", lambda path: types.SimpleNamespace(free=10**12))
     folder = tmp_path / "d1-3B"
     with pytest.raises(fetch.FetchError, match=re.escape(
-            f"the download of {REPO} failed: the Hub gave no commit for it; {fetch.RETRY}")):
+            f"the download of {REPO} failed: the Hub answered with commit {said}, not the {COMMIT} that mms pins")):
         fetch.download(ABOUT, folder)
     assert [call[0] for call in seen] == ["model_info"] and not folder.exists()
 
@@ -450,7 +451,7 @@ def test_a_hub_that_gives_no_commit_is_an_error_and_nothing_is_downloaded(monkey
 def test_a_hub_imported_before_the_switches_were_set_is_not_used(monkeypatch):
     seen = fake_module(monkeypatch, quiet=False)
     with pytest.raises(RuntimeError, match="imported before mms turned off its telemetry and Xet"):
-        fetch.hub_info(REPO)
+        fetch.hub_info(REPO, COMMIT)
     with pytest.raises(RuntimeError, match="imported before"):
         fetch.hub_download(REPO, Path("x"), COMMIT)
     assert seen == []
@@ -460,7 +461,7 @@ def test_what_the_hub_raises_is_a_fetch_error_naming_the_repo(monkeypatch, tmp_p
     fake_module(monkeypatch, info_error=ConnectionError("no route"), download_error=TimeoutError("read timed out"))
     with pytest.raises(fetch.FetchError, match=re.escape(
             f"the download of {REPO} failed: ConnectionError: no route; {fetch.RETRY}")):
-        fetch.hub_info(REPO)
+        fetch.hub_info(REPO, COMMIT)
     with pytest.raises(fetch.FetchError, match=re.escape(
             f"the download of {REPO} failed: TimeoutError: read timed out; {fetch.RETRY}")):
         fetch.hub_download(REPO, tmp_path, COMMIT)
@@ -499,4 +500,4 @@ def test_the_filter_is_on_the_hubs_logger_once_however_often_the_hub_is_used(mon
 def test_with_the_real_hub_blocked_a_call_that_reaches_for_it_is_an_import_error():
     """conftest blocks the real one in every test: a call that reaches for it fails, and downloads nothing."""
     with pytest.raises(ImportError):
-        fetch.hub_info(REPO)
+        fetch.hub_info(REPO, COMMIT)

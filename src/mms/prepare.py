@@ -195,7 +195,8 @@ def switch(home: Path, target: str, given: str | None, url: str | None) -> tuple
         if not backend.served:
             raise ValueError(f"{about.name} is not served, so --url has no use: leave it out")
         configuration.loopback(url)
-    if backend.in_mms_env and (problem := modelenv.problem(backend, folder, config.decider_envs)) is not None:
+    # torch is asked for a CUDA device only when a download is about to start: a model that is there is switched to as it is
+    if backend.in_mms_env and (problem := modelenv.problem(backend, folder, config.decider_envs, cuda=missing)) is not None:
         raise ValueError(f"{about.name} runs in mms's own env, which is not ready: {problem}")  # before any download
     if missing:
         fetch.download(about, folder, keep_free(config, folder))
@@ -240,7 +241,7 @@ def prepare(home: Path, target: str, given: str | None) -> int:
     folder, backend, about, missing = locate(config, target, given)
     if backend.in_mms_env:
         print(f"{about.name} runs in mms's own env, so nothing is installed; checking that env")
-        if (problem := modelenv.problem(backend, folder, config.decider_envs)) is not None:
+        if (problem := modelenv.problem(backend, folder, config.decider_envs, cuda=missing)) is not None:
             raise PrepareError(problem)  # before any download
     if missing:
         fetch.download(about, folder, keep_free(config, folder))

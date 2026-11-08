@@ -25,16 +25,19 @@ SCORE_LEVELS = (2, 10)  # d3_runtime.SCORE_LEVELS
 TIMED = {"picture_s", "char_s"}
 
 
-def _about(name: str, picture_s: tuple, char_s: float, repo_gb: float) -> About:
+def _about(name: str, picture_s: tuple, char_s: float, repo_gb: float, commit: str) -> About:
     return About(name=name, reads={"video", "image"}, types=("noul", "choice", "score"), extracts_from=(), speech=False,
                  max_px=1_638_400,  # a picture is read at up to 1.6 MP (modeling_d3's system_one)
                  questions_per_read=1, picture_s=picture_s, char_s=char_s, question_keys={"criteria"}, notes="d3.md",
-                 measured=TIMED, repo=f"vllm-sr/{name}", repo_gb=repo_gb)
+                 measured=TIMED, repo=f"vllm-sr/{name}", commit=commit, repo_gb=repo_gb)
 
 
-EDGE = _about("d3-edge", ((230_400, 0.041), (1_638_400, 0.153)), 0.042 / 2000, 1.2)
-MINI = _about("d3-mini", ((230_400, 0.163), (1_638_400, 0.573)), 0.135 / 2000, 9.1)
-FLASH = _about("d3-flash", ((230_400, 0.184), (1_638_400, 1.005)), 0.225 / 2000, 16.8)
+EDGE = _about("d3-edge", ((230_400, 0.041), (1_638_400, 0.153)), 0.042 / 2000, 1.2,
+              "c454ee39b862248d70abd7f84195d2f54ffe6d43")
+MINI = _about("d3-mini", ((230_400, 0.163), (1_638_400, 0.573)), 0.135 / 2000, 9.1,
+              "df99bf4ca4418bc6908ee68e9b7479af1f3b8800")
+FLASH = _about("d3-flash", ((230_400, 0.184), (1_638_400, 1.005)), 0.225 / 2000, 16.8,
+               "13dc1cc8ef23caefa765907e1d764751e5629f7d")
 BY_NAME = {about.name: about for about in (EDGE, MINI, FLASH)}
 
 

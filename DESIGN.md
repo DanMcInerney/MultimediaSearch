@@ -91,7 +91,7 @@ remember_max_mb = 2000       # the largest file `remember` copies
 # ffmpeg = "C:/tools/ffmpeg.exe"   # default: ffmpeg on PATH, else the binary from imageio-ffmpeg
 
 [decider]
-model = "C:/models/d1-3B"   # a model folder a backend claims, or python:<file.py> (§13.3); `mms install` sets one; none: a job that decides fails
+model = "C:/models/d1-Omni-2B"   # a model folder a backend claims, or python:<file.py> (§13.3); `mms install` sets one; none: a job that decides fails
 idle_s = 600                     # unload the model after this long with no call
 # url = "http://127.0.0.1:8741"  # where the owner serves the model (H2O only); loopback only; default: the backend's
 # envs = "C:/models/envs"        # where `mms model use` and `prepare` build envs (§13.3); default: envs/ beside the model folder
@@ -124,7 +124,7 @@ keep = { max_gb = 5, when_full = "thin" }
 | `microphone` | an audio input | `device`, `segment_s` | yes |
 | `camera` | a video input | `device`, `fps` (the device's), `segment_s` | yes |
 | `ffmpeg` | any ffmpeg input (written by hand only) | `input`, `preset` or `encode`, `media`, `segment_s` | yes |
-| `folder` | each changed file under `path` as a version | `path`, `glob` ("\*\*/\*"), `rescan_s` (5), `copy_max_mb` (50) | no |
+| `folder` | each changed file under `path` as a version | `path`, `glob` ("\*\*/\*"; stays under `path`, below), `rescan_s` (5), `copy_max_mb` (50) | no |
 | `log` | each new line of the files under `path` as a record | `path`, `glob`, `rescan_s`, `time_field` | no |
 | `command` | each stdout line of a program as a record | `command` (a list), `time_field` | yes |
 | `program` | what `mms.log` sends (§8) | `segment_s` (60) | no |
@@ -149,6 +149,10 @@ keep = { max_gb = 5, when_full = "thin" }
   query or fragment (`config.loopback`); anything else is a `config_error`. A model that is not served, and `python:`,
   refuse a `url` (a `decider` error), so a stale one is not ignored after a switch. `envs` is an absolute path or starts
   with `~`.
+- **`glob`** is a pattern of the files under `path`, and stays there: a `..` segment (either slash), or a pattern that is
+  absolute or names a drive, is a `config_error`. The home guard (§4.4) checks `path` alone, so `../home/daemon.json` from a
+  folder beside the home would otherwise store the daemon's token as a readable item. `source_set` and a hand edit meet the
+  same check, in the loader.
 - `config.py` parses the file into `Config` and `Source` once, at the boundary. A source's name is
   `[A-Za-z0-9_-]{1,64}` (`config.NAME`), since it is also a folder name.
 
@@ -160,9 +164,12 @@ keep = { max_gb = 5, when_full = "thin" }
   - new ones start at the next step;
   - unchanged ones are left alone;
   - a new `[decider] model`, `url` or `envs` unloads the old one.
-- A file that does not parse is refused: the daemon keeps the last good config, logs the error, and `status` gives it
-  as `config_error` until the file is fixed. A daemon that starts with a bad file runs with no sources, so that its API
-  can say why.
+- A file that does not fit is refused: the daemon keeps the last good config, logs the error, and `status` gives it
+  as `config_error` until the file is fixed. Every way a file can fail is that one error (`config.ConfigError`, the loader's
+  alone): not UTF-8 (PowerShell 5.1's `>` writes UTF-16), unreadable, TOML that does not parse, a table where a value is
+  due or the reverse, a number that is `inf`, `nan` or too big. A daemon that starts with a bad file runs with no sources, so
+  that its API can say why. This holds for `consent.json` too: one that does not parse is a `config_error`, the file is left
+  as it is, and `status` says why rather than failing, with a daemon that has not yet read the damage and with none running.
 
 ### 4.3 Consent
 
@@ -174,9 +181,13 @@ keep = { max_gb = 5, when_full = "thin" }
   - the `command` list for command, as JSON (so `["python", "a b"]` and `["python a", "b"]` differ).
 
   A change to any of these needs a new approval. A change to caps, `fps` or other options does not.
-- **Removing a source takes its approval with it:** whenever a config is applied, capture's `apply` drops the
-  approvals of names that are not in the config as a source that needs one. A source added later under that name starts
-  unapproved.
+- **Removing a source takes its approval with it:** once `mms.toml` and `consent.json` have stood still for 3 s
+  (`daemon.PRUNE_QUIET_S`, counted from the start and from each reload), and while both are good, the daemon drops the approvals
+  of names that are not in the config last read as a source that needs one, on one path for both. A source added later under
+  that name starts unapproved; one added back within the 3 s, with the same device or command, keeps it. The wait is for a file
+  that is empty or missing, or half written and still parses (an editor that truncates, then writes): it is a config with no
+  sources for a moment, and pruning then would take every approval, so screen and microphone would stop until approved again.
+  A file that does not parse prunes nothing either.
 - **Where it lives:** `consent.json`, written by `mms approve` and the daemon's prune, every read and write under `consent.lock`:
   `{"<source>": {"fingerprint": "<sha256>", "what": "microphone: Microphone (Realtek(R) Audio)", "approved": "<ISO>"}}`.
 - **`mms approve <source>`** prints what the source opens or runs, then asks the owner to type the source's name. It
@@ -191,7 +202,11 @@ keep = { max_gb = 5, when_full = "thin" }
   the server instructions and the skill, which both tell the agent to ask the owner. They do not prevent it, and
   nothing in user space could.
 - `consent.py` is a leaf: `fingerprint(what)`, `approved(home, name, what) -> bool`, `record(home, name, what)`,
-  `revoke(home, name)` and `prune(home, names)`. Capture and ingest pass it what a source opens or runs.
+  `revoke(home, name)` and `prune(home, names)`. Capture and ingest pass it what a source opens or runs; the daemon prunes.
+  What `status` and `source_set` tell the owner to type is the absolute path of the `mms` script beside the daemon's
+  interpreter, then `approve <name>` (`mms` is on no PATH: README, Install). For PowerShell, the terminal of Windows, the bare
+  path when it has nothing to quote, else `& "<path>" approve <name>` (a quoted path alone is a string there, and what follows
+  it a parse error); for a POSIX shell, as `shlex.quote` gives it. The skill tells the agent to pass the command on as it is.
 
 ### 4.4 The writer: `source_set` and new streams
 
@@ -204,12 +219,15 @@ keep = { max_gb = 5, when_full = "thin" }
   - a name whose table is of another kind, or of kind `ffmpeg` or `push`, which the owner changes by hand
     (`wrong_kind`);
   - a `max_gb` below the bytes the source holds now (§9's count), or a `max_days` shorter than the age of its oldest
-    item or record (`would_delete`), so that no agent makes the janitor delete history (the owner may, by hand);
-  - a `max_gb` or `max_days` of an existing source below what it is (a source with none counts as unlimited), so a cap
-    can stay or rise through `source_set` and never fall (`would_delete`, with a hint that the owner edits
-    `mms.toml`);
+    item or record (`would_delete`), so that no agent makes the janitor delete what is held now (the owner may, by hand).
+    A cap set at exactly what the source holds is allowed: the janitor then drops its oldest recordings as new ones arrive;
+  - a `max_gb` or `max_days` of an existing source below what it is (a source with none counts as unlimited), so a change
+    can keep a cap or raise it, never lower it (`would_delete`, with a hint that the owner edits `mms.toml`). Removing the
+    source and adding it again can set a lower one, but never below what it holds, by the first bullet;
   - a folder or log `path` that is the MultimediaSearch home, holds it (a source at `~`) or is inside it (`bad_request`,
     `field: path`): nothing the home holds is scanned or remembered;
+  - a folder or log `glob` that leaves its path: a `..` segment, or one that is absolute or names a drive (`bad_request`;
+    §4.1);
   - any change while `mms.toml` does not parse (`config_error`).
 - **`source_set` merges the fields it is given.** A new source needs `kind` and `max_gb`. For one that exists, every
   option, `when_full`, `max_gb` and `max_days` not given keeps its value, so a change to a cap or `fps` leaves the
@@ -529,7 +547,9 @@ It runs every 30 s, and once at startup before capture.
    so a recording or picture placed at an old time is old at once.
 5. **Expiry:** items and records past `expires` are deleted, unless kept.
 6. **Housekeeping:** `looks/` and `spool/_bad/` files older than a day go; so does any `.part`, `.ffconcat` or `.err`
-   file under `streams/`, `files/` and `spool/` older than an hour (what a crash left); `daemon.log` over 10 MB becomes
+   file under `streams/` and `spool/`, and the writer's own partial copy under `files/` (`.<pid>-<thread>-<name>.part`,
+   dot-first), older than an hour (what a crash left). A stored file's name ends with the owner's own file's name, so one that
+   ends `.part`, `.err` or `.ffconcat` is not a stray: it goes with its row, by the caps and ages. `daemon.log` over 10 MB becomes
    `daemon.log.1`. A label goes with the item it names (§5.1).
 7. **Deleting** is unlink, then the row. An unlink that fails because a reader has the file open is retried on the
    next pass. A version's file is unlinked only when no other item points at it.
@@ -565,10 +585,13 @@ would narrow the gap but rewrites the whole index, so it does not run.
   dropped by the operating system when it dies. `client.connect` takes the lock as a probe; a free lock is no daemon,
   and a `daemon.json` left behind is deleted under that lock. HTTP only says whether a live daemon is ready. A probe
   holds the lock for microseconds, so a starting daemon, which waits 2 s for it, never loses it.
+- **Permissions (POSIX only):** before anything else the daemon sets `umask(0o077)` and makes the home `700`, so the token in
+  `daemon.json`, the index and the recordings are the owner's alone, on a shared machine too. Not tried on Linux yet.
 - **Startup:**
   1. the lock;
   2. `children.contain()`;
-  3. the config (a bad one gives no sources and a `config_error`);
+  3. the config (a bad `mms.toml` or `consent.json` gives no sources and a `config_error`; a good one schedules the prune of
+     approvals, §4.3);
   4. `Store`;
   5. a janitor pass;
   6. capture's reconcile and the spool's `.part` cleanup;
@@ -787,7 +810,7 @@ marked>}`.
  "decider": {"model", "state", "error", "waiting"},
  "jobs": {"running", "queued"},
  "sources": [{"name", "kind", "state", "project", "keep": {"max_gb", "when_full", "max_days"},
-              "bytes", "items", "records", "newest", "error"?, "approve"?: "mms approve <name>"}],
+              "bytes", "items", "records", "newest", "error"?, "approve"?: "<mms script> approve <name>"}],
  "devices"?: {"displays": [...], "microphones": [...], "cameras": [...], "error"?}}
 ```
 
@@ -906,10 +929,9 @@ that is fewer than all; its default yes/no threshold, marked `(assumed, not yet 
 a generic line, and no model (or a folder no backend reads) says so. The whole description stays within 1,024 characters,
 (Claude Code cuts a longer one). For the default:
 
-> The model now is d1-3B. It sees pictures and video frames. It hears nothing: sound is not read. It answers noul, choice and
-> score. A question carries only criteria besides type, instructions and hit. Its default yes/no threshold (hit) is 0.8
-> (assumed, not yet measured here). It reads any number of questions in one pass. Its notes: models/d1_3b.md in the
-> mms-questions skill.
+> The model now is d1-Omni-2B. It sees pictures and video frames and hears sound, but not speech. It answers noul, choice,
+> score, text, number, date, box and boxes (text, date and a number with no range only from text and records). Its default
+> yes/no threshold (hit) is 0.8. It reads 16 questions in one pass. Its notes: models/d1.md in the mms-questions skill.
 
 A switch of model during a session is seen by the next session's agent; until then `ask`'s refusals and warnings name the
 real model. `ask`'s `hit` schema says "the model's own if not given: this tool's description says it".
@@ -1131,8 +1153,8 @@ families swap in through `[decider] model`, one loaded at a time.
 
 **`About`** is a frozen dataclass, and is checked when it is made:
 - a value that is no fact (an empty name, a kind that does not exist, a negative cost or `repo_gb`, a `hit` outside 0 to 1,
-  a question key or a `measured` entry that does not exist, a `repo` that is not owner/name, picture points whose pixels
-  do not increase) is a `ValueError`;
+  a question key or a `measured` entry that does not exist, a `repo` that is not owner/name, a `repo` with no `commit` or a
+  `commit` that is not 40 hex digits, picture points whose pixels do not increase) is a `ValueError`;
 - so is one that would quietly switch a lint off (a cost that is not a finite number, a `speech` that is not true or
   false, no `extracts_from` while `types` has text, date or number);
 - `profile` is kept read-only, since one `About` is shared by every job;
@@ -1155,6 +1177,7 @@ families swap in through `[decider] model`, one loaded at a time.
 | `hit` | its default yes/no threshold, for a question whose `hit` is true or left out | 0.8 |
 | `notes` | the file in `skills/mms-questions/models/` that holds what an agent needs of the model (§15) | `d1.md` |
 | `repo` | the Hugging Face repo (owner/name) that `mms model use` downloads the model's folder from; empty for none | `LiquidAI/d1-Omni-2B` |
+| `commit` | the commit of `repo` that is downloaded, 40 hex digits: the code and weights that were tested, and that run on the machine; empty with no `repo` | `c8d48c08dada0191c6b362820f055cfb49c99426` |
 | `repo_gb` | the repo's size in GB, for `mms model list` to show before a download | 4.4 |
 | `measured` | which of `picture_s`, `sound_s`, `char_s`, `file_s` and `hit` were measured on this laptop; the rest are assumed | `picture_s`, `sound_s`, `char_s`, `hit` |
 | `profile` | overrides of `reader.PROFILE` | none |
@@ -1330,14 +1353,19 @@ that cannot answer.
 **Envs and `mms model`.** d3 and Perplexity run in envs that only `mms model use` and `prepare` build, never on first use. d1
 and d1-3B run in mms's own env and H2O in the owner's. `modelenv.py` holds all of it: where an env is, its marker (written and
 cleared), its Python, the one comparison of installed versions with pins (`compare`), and whether a backend's env is ready
-(`problem`); the backends and `mms model` ask it and keep no copy of the rule.
+(`problem`); the backends and `mms model` ask it and keep no copy of the rule. For mms's own env, `problem(..., cuda=True)` also
+asks torch whether it finds a CUDA device, by `cuda_problem`: a process of mms's interpreter runs `torch.cuda.is_available()`
+(the daemon and the CLI never import torch), which takes seconds, so only `use` and `prepare` ask, and only before a download
+(`cuda=missing`: a model that is there is not refused after, say, a driver crash), and `mms model list` does not.
 - An env is `<envs>/<family>` (`d3`, `pplx`; the three d3 models share one): `[decider] envs`, else `envs/` beside the model
   folder (`C:/models/envs`). Building one runs uv with `UV_CACHE_DIR=<envs>/.uv-cache`, so the downloads stay on the models'
   drive, in five steps: `uv venv --python 3.12`; `uv pip install --torch-backend <backend> <requirements>`; the env's own
   Python running `worker/serve.py --check-env` (installed versions from `importlib.metadata`, no torch import); a check of
   those against the `==` pins; and only then `mms-env.json` (`{"family", "requirements", "versions", "prepared"}`). The pins
-  are constants of each backend (d3: torch 2.11, transformers 5.17, on `cu128`; Perplexity: the card's six, torch 2.14 on
-  `cu130`, which needs driver R580 or newer).
+  are constants of each backend (d3: torch 2.11, torchvision 0.26, transformers 5.17, on `cu128`; Perplexity: the card's six, all
+  `==`, torch 2.14 on `cu130`, which needs driver R580 or newer). Only `==` pins are compared. d3's other packages (accelerate,
+  safetensors, huggingface_hub, einops, pillow, opencv-python-headless, numpy) are lower bounds or unpinned, and what any of them
+  pulls in is not pinned for either family, so two prepares at different times can build different envs.
 - d3's and Perplexity's `__init__` read the marker (`modelenv.ready_python`). A missing one, or one made for other
   requirements (mms was updated), is a `ValueError` that names `mms model prepare <name>`, and reaches the agent as a
   `decider` error before any scan.
@@ -1351,9 +1379,13 @@ cleared), its Python, the one comparison of installed versions with pins (`compa
 - **`fetch.py` downloads a model's folder** from `About.repo`. It is the one module that imports huggingface_hub, and only
   when a download runs. It turns off telemetry, the implicit token and Xet before the first import (Xet would cache under
   `~/.cache`; with it off everything lands in the model folder), passes `token=False`, and refuses a huggingface_hub that
-  was imported before it set them. The Hub's advice to set `HF_TOKEN` is not shown, since mms sends none. mms pins no revision:
-  it takes the commit `main` is at when it asks the size, and downloads that commit by its hash, so the size it checked is
-  what it downloads, and huggingface_hub writes no ref under `~/.cache` (it does for a branch, even into a folder). The rules:
+  was imported before it set them. The Hub's advice to set `HF_TOKEN` is not shown, since mms sends none. **Each model's `About`
+  pins the commit of its repo** (`About.commit`; one per model, checked to exist upstream). mms asks the Hub for the size at that
+  commit and downloads that commit by its hash, never `main`, so what runs on the machine is what was tested, and huggingface_hub
+  writes no ref under `~/.cache` (it does for a branch, even into a folder). A Hub that answers with another commit is refused.
+  The pin matters because a model's own Python runs with the owner's rights: d1 and d3 load `modeling_*.py` from the folder with
+  `trust_remote_code=True`, Perplexity imports `pplx_decider`, and H2O's shim is run by the owner, each in a process handed the
+  screen and the microphone. A model is moved to a newer commit only by changing its `About` in a mms release. The rules:
   - A folder that is that model and whole (`fetch.ready`: a backend claims it as that model, and `unfinished` finds every
     file that the Hub's record of the repo lists there at its size, no shard missing from the index, and some `*.safetensors`)
     is never downloaded: no network call. The record is `.cache/huggingface/trees/<commit>.json`, which huggingface_hub writes
@@ -1380,7 +1412,9 @@ cleared), its Python, the one comparison of installed versions with pins (`compa
   or the configured model's folder that is not a folder is an error; a missing `<home>/models` just lists no folders.
 - **`mms model use NAME|FOLDER [--url URL] [--dir DIR]`:** makes the model the one mms uses, whatever is missing, in this order. It
   checks the claim and the `--url` (refused for a model that is not served, or not loopback). A d1 or d1-3B whose own env
-  lacks a pin stops here, naming `uv sync --group d1`, before any download. It downloads the model if it is not there, builds
+  lacks a pin stops here, naming `uv sync --group d1`, before any download. So does one whose torch finds no CUDA device (a
+  PC with no NVIDIA GPU, or no driver for it), naming the requirement and the fix, but only when a download is about to start:
+  a model that is already there is switched to without asking torch. It downloads the model if it is not there, builds
   the env of d3 or Perplexity if it is not prepared (as `prepare` does), and for H2O prints its install and start commands when
   `/health` does not answer (not while it is warming). It writes `[decider] model` (and `url`: H2O's, else removed) with
   `config.set_decider`, keeping the file's comments, and the daemon follows (§4.2). It prints `model: <name> (<folder>)`; for a
@@ -1388,7 +1422,7 @@ cleared), its Python, the one comparison of installed versions with pins (`compa
   config has a microphone or camera such a model cannot hear. A download or build that fails changes nothing in the config.
 - **`mms model prepare NAME|FOLDER [--dir DIR]`:** the same without switching: it downloads the model if it is not there and
   builds the env as above. For d1 and d1-3B it installs nothing and checks mms's own env against `D1.requirements` (`uv sync
-  --group d1` when a pin fails) before any download. For H2O it installs nothing and prints the commands that install and
+  --group d1` when a pin fails) and, when a download is about to start, for a CUDA device, before it. For H2O it installs nothing and prints the commands that install and
   start the server.
 - **H2O's `start` is a template:** `{folder}` is the model folder as WSL sees it. `wsl()` turns `C:\models\x` into
   `/mnt/c/models/x`, quotes it for the shell, and refuses a folder that is not on a lettered drive (a UNC path), which WSL
@@ -1410,7 +1444,7 @@ default NAT networking forwards Windows' `127.0.0.1` to them (localhost forwardi
 
 **To add a model:** write a backend module whose class has the members above, and add it to `BACKENDS`; for a model mms runs, a
 worker file with `load` and `decide`; and a notes file in `skills/mms-questions/models/` that its `About.notes` names
-(§15); give its `About` a `repo` and `repo_gb` if `mms model use` should download it. Or write a `python:` file. Nothing else
+(§15); give its `About` a `repo`, the `commit` of it that was tested, and `repo_gb` if `mms model use` should download it. Or write a `python:` file. Nothing else
 in mms changes. A model with an env of its own makes its `Worker` from
 `modelenv.ready_python(self, folder, envs, name)`, which refuses an env that is not prepared; a served one gives `Served` the
 `hint` to show when nothing answers. Keep it cheap to make:
@@ -1436,7 +1470,8 @@ and the limits and defaults of its parameters. It reads the model's facts from `
 ## 14. Install
 
 `mms install [--only claude|codex|skills|login|model|daemon ...] [--remove] [--claude-exe PATH] [--model NAME|FOLDER]
-[--models-dir DIR]`. It changes only what is MultimediaSearch's, and fails, saying why, on anything else of the same name:
+[--models-dir DIR]`. It changes only what is MultimediaSearch's, and fails, saying why, on anything else of the same name
+(an `mms` server in Claude's list or in Codex's file, a skill folder, a login entry):
 - **`<mms>`** is the absolute path of the `mms` script beside `sys.executable` (the project's venv), so `mms` need not be
   on PATH. When `MMS_HOME` is set, each registration passes it on.
 - **Claude Code:** `claude mcp get mms`: a non-zero exit means none (its wording is not read; if `claude` is broken,
@@ -1444,20 +1479,27 @@ and the limits and defaults of its parameters. It reads the model's facts from `
   (`claude mcp remove --scope user mms`); any other `mms` entry is refused. Then
   `claude mcp add --scope user mms [-e MMS_HOME=<home>] -- <mms> mcp`.
   `claude` is the one on PATH unless `--claude-exe` names another.
-- **Codex:** in `$CODEX_HOME/config.toml` (default `~/.codex`), `[mcp_servers.mms]` gets `command = "<mms>"`,
+- **Codex:** with no `$CODEX_HOME` folder (default `~/.codex`: Codex makes it when it first runs) the step is `skipped`, and
+  nothing creates the folder, here or in the skills step. A `[mcp_servers.mms]` that runs another command than `<mms> mcp`,
+  or is a `url`, is refused (with `--remove` too), as Claude's is; one with only the owner's own keys (what `--remove`
+  leaves) is ours to fill. In `$CODEX_HOME/config.toml`, `[mcp_servers.mms]` gets `command = "<mms>"`,
   `args = ["mcp"]`, when set `env.MMS_HOME`, and `default_tools_approval_mode = "approve"` unless the owner set a
   mode. Without it Codex asks before every `mms` call, and `codex exec` refuses them all (seen on 31 Oct with Codex
-  0.159.3); no `mms` tool can approve a device, lower a cap or delete history (§4.3, §4.4), so approving them is safe.
+  0.159.3); no `mms` tool can approve a device or delete what a source holds, and the most one can do to history is cap a
+  source at exactly what it holds (`source_set` remove, then add: §4.4), so that its oldest recordings go as new ones arrive,
+  which the owner accepts so that Codex need not ask before each call (§4.3).
   The owner's other keys stay, and `--remove` takes out only these. It is written with tomlkit, and the rest of the
   file is kept. Codex's defaults (10 s to start, 60 s a call) fit: the adapter answers at once, and `ask` returns
   within 50 s.
-- **Skills:** `src/mms/skills/mms-questions/` (with its `models/` notes) is copied to `~/.claude/skills/` and `$CODEX_HOME/skills/`,
-  replacing an older copy of it. A folder of that name whose `SKILL.md` is not named `mms-questions` is refused.
+- **Skills:** `src/mms/skills/mms-questions/` (with its `models/` notes) is copied to `~/.claude/skills/` and, when the
+  `$CODEX_HOME` folder is there, `$CODEX_HOME/skills/`, replacing an older copy of it. A folder of that name whose `SKILL.md` is not named `mms-questions` is refused.
 - **Login:**
   - Windows: `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\mms.cmd`, running
     `start "" /min "<mms>" start --detach`. Task Scheduler's at-logon trigger needs an administrator; the Startup folder
     does not.
   - Linux: `$XDG_CONFIG_HOME/autostart/mms.desktop` (default `~/.config`) with `Exec=<mms> start --detach`.
+  - An entry that exists and does not run `<mms> start --detach` is another program's (or another clone's): refused,
+    and left alone by `--remove`. One that does is rewritten (another `MMS_HOME`) or deleted.
 - **Model:** the step is `mms model use` (`prepare.switch`, §13.3), and runs before the daemon, which then starts with a
   model. With `--model` it downloads and configures that model (a name mms knows, or a folder). With none, a model that is
   already configured stays (`unchanged`, saying `mms model use NAME` switches), so running `mms install` again never changes the
@@ -1465,8 +1507,9 @@ and the limits and defaults of its parameters. It reads the model's facts from `
   says where the folder goes (default: the configured model's folder, else `<home>/models`); with a model configured and no
   `--model`, nothing is downloaded, so it fails the step rather than being ignored. The licence is named before the
   download (§13.3), with no prompt. For a model that hears nothing, the line says so and names `mms model use d1-Omni-2B`. The work
-  prints to stderr, so stdout keeps one line per step. A failure (mms's own env not ready, no room, a folder that is someone
-  else's, a download that stopped) is this step's `failed (<why>)`, and the other steps go on. `--model` or `--models-dir`
+  prints to stderr, so stdout keeps one line per step. A failure (mms's own env not ready, which includes torch finding no
+  CUDA device on a PC with no NVIDIA GPU, no room, a folder that is someone else's, a download that stopped) is this
+  step's `failed (<why>)`, and the other steps go on. `--model` or `--models-dir`
   with `--remove`, or with an `--only` that leaves out `model`, is a usage error (exit 2). `--remove` keeps the weights and
   `[decider] model`, and says so: the owner deletes the folder by hand.
 - **Daemon:** it is started once now, as `mms start --detach` starts it (§10); `--remove` leaves it running.

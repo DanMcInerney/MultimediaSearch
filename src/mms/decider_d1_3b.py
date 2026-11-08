@@ -27,7 +27,8 @@ SCORE_LEVELS = (2, 10)  # the readout is defined for 2 to 10 levels (prompt.read
 ABOUT = About(name="d1-3B", reads={"video", "image"}, types=("noul", "choice", "score"), extracts_from=(), speech=False,
               question_keys={"criteria"}, max_px=1_048_576, questions_per_read=0,
               picture_s=((230_400, 0.051), (1_048_576, 0.177)), char_s=0.050 / 2000, hit=0.8, notes="d1_3b.md",
-              measured={"picture_s", "char_s"}, repo="LiquidAI/d1-3B", repo_gb=6.3)
+              measured={"picture_s", "char_s"}, repo="LiquidAI/d1-3B", commit="051bcc464b01b9f92942b364d9586b0ef5912432",
+              repo_gb=6.3)
 VARIANTS = {(2048, 30): ABOUT}  # config.json text_config (hidden_size, num_hidden_layers) -> the model's facts
 
 

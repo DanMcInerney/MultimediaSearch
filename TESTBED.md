@@ -89,18 +89,27 @@ less. Keep it at four, and run one suite at a time: more load than that, beside 
   It appends what each call was given (picture sizes and corner colours, each sound's RMS, rate and loudest second, the
   questions, the state's length and its counts of NUL, U+FFFD, ESC and CR) to `fake-decider.jsonl` in the home, so a
   test checks what d1 would have read.
+- **No GPU question either:** `modelenv.cuda_problem`, which `use`, `prepare` and `mms install` ask before a d1 download,
+  starts a process of this interpreter that asks torch whether it finds a CUDA device. The fixtures of `test_model_cli.py` and
+  `test_install.py` replace it, so no test asks the machine; the tests of the check itself run it for real against a `torch` that
+  `conftest.fake_torch` puts first on `PYTHONPATH` (one that says yes, one that says no, one that does not import).
 - **No download and no real uv:** nothing in a test reaches Hugging Face or builds a real env.
   - `tests/conftest.py`'s autouse `no_hugging_face` makes `import huggingface_hub` fail in the test's process, and `env()` gives
     every process a test starts `HF_HUB_OFFLINE=1`. A test of a download fakes the Hub with `tests/fake_hub.py`: its `FakeHub`
     replaces `fetch.hub_info` and `fetch.hub_download` (the one fake that `test_fetch.py`, `test_model_cli.py` and
     `test_install.py` share), records the calls, and leaves a `model_folder` in the folder as a download would. The tests assert
-    those calls: a model that is already there makes none. `test_fetch.py` tries `_hub` against a fake `huggingface_hub` module.
+    those calls, with the commit that the model's own `About` pins in each (`("info", repo, commit)` and `("download", repo,
+    folder, commit)`, never a branch): a model that is already there makes none. A test in `test_deciders.py` holds that every
+    `About` with a repo has a 40-hex commit, and the eight that were tested. `test_fetch.py` tries `_hub` against a fake `huggingface_hub` module.
   - Its autouse `no_real_uv` points `prepare.uv_command` at a script that exits `no real uv in tests`, so a `use` or `prepare`
     that reaches an env build fails instead of downloading gigabytes. `test_model_cli.py`'s `fake_uv` puts a script that records
     what it is asked in its place (`test_prepare_without_uv_says_so` restores the real lookup of `uv` on `PATH`).
 - **Programs:** spool tests on the daemon side write spool files exactly as DESIGN.md §8.2 gives them. The client's own
   tests read back what it wrote against the same section, and `tests/test_seams.py` runs the client and the daemon together.
 - **Wait on state, never on sleeps:** `wait_for` polls a condition, and a failure prints the daemon's log.
+- **CI:** `.github/workflows/test.yml` runs `uv run pytest` on `windows-latest` for each push to main and each pull request,
+  with the d1 group left out (`uv sync --locked --no-group d1`: no torch, which no offline test needs). Nothing else runs
+  there, and `tests/test_imports.py` checks that every package mms imports outside `worker/` is a declared dependency.
 
 ## GPU tests
 
@@ -447,7 +456,8 @@ Each item is an end-to-end test.
    - a label with `keep`, or `mms keep`, that would take the source's kept bytes past its `max_gb` is `too_big` and marks
      nothing; with no `max_gb` it passes; two sessions that race for the last of the room get one `too_big`;
    - a label goes with its item and a label of no item stays; stray `.part`, `.ffconcat` and `.err` files go once an hour
-     old, and a younger one stays;
+     old, and a younger one stays; under `files/` only the writer's own dot-first `.part` is a stray, and a stored file
+     whose name ends `.part`, `.err` or `.ffconcat` stays with its row;
    - `looks/` files go after a day;
    - every write passes `Store.reserve`: a folder remember of large files stops at the floor, file by file, and a write
      larger than its source's whole cap is `too_big`.
@@ -456,7 +466,14 @@ Each item is an end-to-end test.
      once approved it starts with no restart;
    - changing its device, input or command makes it `needs_approval` again; changing its cap or fps does not, also
      through `source_set`, which keeps every field it is not given;
-   - removing a source takes its approval with it, and so does a hand edit that removes it;
+   - removing a source takes its approval with it, and so does a hand edit that removes it, once the files have stood still
+     for 3 s (`wait_for`, no sleeps); a bad `mms.toml` at startup takes none (they stand when the fixed file loads); an empty
+     write that the real content follows quickly takes none either; a `consent.json` that does not parse keeps the daemon
+     running with no sources and says why, the file untouched, and damaged under a running daemon, or with no daemon at all
+     (`mms status`), `status` says why and the sources go on;
+   - `status` and `source_set` give `approve` as the absolute path of the `mms` script beside the interpreter, in the form
+     PowerShell takes (bare, else `& "<path>"`; a POSIX shell's quoting elsewhere), and PowerShell runs it as pasted (a
+     path with a space is tried through a script of that name);
    - `mms approve` refuses without a terminal; `--revoke` stops the source;
    - nothing reachable through MCP approves: the tools list holds no such tool, `POST /v1/approve` is `not_found`,
      `source_set` with an approval field is `bad_request`, and `consent.json` is unchanged after every tool has run.
@@ -464,15 +481,19 @@ Each item is an end-to-end test.
    - `source_set` adds a folder source, and the running daemon ingests it with no restart; `remove` stops it and keeps
      its history;
    - an edit by hand is picked up the same way; a bad one keeps the last good config, and `status` gives
-     `config_error`;
+     `config_error`; so does one that is UTF-16 or cp1252, `sources = 1`, `memory = 1` or `jobs = inf`, each through the
+     loader and one through a running daemon's reload: none is anything but a `ConfigError`;
    - `source_set` keeps the file's comments, and refuses `wrong_kind`, a cap below what the source holds or below the
      cap it has (`would_delete`), and any change while the file is bad; it merges the fields given and keeps the
      source's project; its reply says `pending_reload` until the daemon has applied it;
    - a folder or log source at the home, above it or inside it, and a `remember` of such a path, are refused;
+   - a `glob` that leaves its path (`..` as a segment, with either slash, or absolute or with a drive) is refused by `source_set`
+     and by a hand edit, and nothing outside the folder is read;
    - a daemon that starts with a bad file runs, with no sources, and says why.
 6. **The API**:
    - `daemon.json` appears once the API answers and goes at a clean stop;
-   - a call without the token is `unauthorized`;
+   - a call without the token is `unauthorized`; on POSIX the home is `700` and `daemon.json` and the index are the owner's
+     alone (skipped on Windows, and not yet run on Linux);
    - each op of DESIGN.md §11 answers its documented shape, and each documented error comes back with its code and
      `field`;
    - `find` pages with `next` and `after` through rows that share a time, or differ by microseconds, giving each row
@@ -599,13 +620,17 @@ Each item is an end-to-end test.
 13. **Install**:
     - the fake `claude` gets `mcp remove`, then `mcp add --scope user mms -- <mms> mcp` (with `-e MMS_HOME` when
       set), and a "not found" from remove passes;
-    - the Codex file gets `[mcp_servers.mms]` with its other tables and comments kept;
-    - the skill is in both skills folders, and the login entry in the Startup or autostart folder;
+    - the Codex file gets `[mcp_servers.mms]` with its other tables and comments kept; one that runs another command (or is a
+      `url`) is refused and left alone, `--remove` too, and one with only the owner's own keys is filled; a Codex with no
+      folder is `skipped`, and no step makes the folder;
+    - the skill is in both skills folders, and the login entry in the Startup or autostart folder; a login entry that does
+      not run our `mms start --detach` is refused and left alone, `--remove` too;
     - running it twice changes nothing more;
     - `--remove` undoes each step;
     - the `model` step runs in this process, with the home in `tmp_path` and the Hub faked: a fresh install downloads d1-Omni-2B;
       a model named that hears nothing says so; a model that is configured stays, with no call to the Hub, and a `--models-dir` without
-      `--model` then fails the step; `--model` with `--models-dir` downloads there; mms's own env missing a pin fails the step, with why, before any download; `--remove` keeps the weights
+      `--model` then fails the step; `--model` with `--models-dir` downloads there; mms's own env missing a pin, or its torch finding no CUDA device when a download is due, fails the step, with why, before any
+      download (a model that is there is switched to with no question to torch); `--remove` keeps the weights
       and the setting and says so; `--model` with `--remove`, or without the model step, is a usage error;
     - nothing outside `tmp_path` is written;
     - `mms install`'s registered command line starts the adapter, and it answers `initialize` and a tool call.
@@ -625,7 +650,7 @@ Each item is an end-to-end test.
 16. **A decider can be swapped** (`tests/test_deciders.py`, `tests/test_documents.py`, `tests/test_narrow_deciders.py`):
     - a model folder is read by the backend that claims it, and one no backend claims, a folder that is missing, or
       weights that differ from the backend's `About`, are refused with a message that says why; `About` refuses facts
-      that switch a lint off, and its `profile` cannot be written by a script;
+      that switch a lint off, and a `repo` with no 40-hex `commit`, and its `profile` cannot be written by a script;
     - the decider's status carries no error of another model: a switch of model, or a successful `about`, clears it;
     - a `python:` file with no `ABOUT` or `decide` is refused, and its `load` and `unload` are called;
     - the same ask over one store gives each decider what its `About` declares: sound at its rate, pictures within its

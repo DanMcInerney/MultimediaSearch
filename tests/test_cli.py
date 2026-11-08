@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 
 import pytest
-from conftest import DECIDER, env, mms, mms_json, wait_for, write_config
+from conftest import DECIDER, approve_hint, env, mms, mms_json, wait_for, write_config
 from test_project import make_repo
 
 from mms import project
@@ -183,9 +183,9 @@ def test_status_without_a_daemon_shows_what_the_store_and_config_hold(home, stor
     assert status["jobs"] == {"running": None, "queued": None}
     by_name = {s["name"]: s for s in status["sources"]}
     assert by_name["agent"]["records"] == 1 and by_name["agent"]["keep"] == {"max_gb": 1, "when_full": "thin", "max_days": 30}
-    assert by_name["mic"]["state"] == "needs_approval" and by_name["mic"]["approve"] == "mms approve mic"
+    assert by_name["mic"]["state"] == "needs_approval" and by_name["mic"]["approve"] == approve_hint("mic")
     table = mms(home, "status").stdout
-    assert "not running" in table and "agent" in table and "1 GB thin 30 d" in table and "run: mms approve mic" in table
+    assert "not running" in table and "agent" in table and "1 GB thin 30 d" in table and f"run: {approve_hint('mic')}" in table
 
 
 def populate(store: Store, now: float) -> dict:
@@ -405,3 +405,14 @@ def test_the_cli_is_not_a_second_writer_remember_label_and_keep_go_through_the_d
     assert mms_json(home, "keep", "--source", "agent", "--since", "1h")["items"] == 0
     assert client.connect(home) == started, "the same daemon took all three"
     assert [row["type"] for row in mms_json(home, "find", "--text", "kettle")["results"]] == ["record"]
+
+
+def test_status_without_a_daemon_says_a_consent_file_is_damaged(home):
+    write_config(home, '[sources.mic]\nkind = "microphone"\ndevice = "Some Mic"\n')
+    (home / "consent.json").write_bytes(b"{nope")
+    status = mms_json(home, "status")
+    assert status["running"] is False and "consent.json does not parse" in status["config_error"]
+    assert "consent.json does not parse" in mms(home, "status").stdout, "the table says so too, and the exit code is 0"
+    assert (home / "consent.json").read_bytes() == b"{nope", "nothing is rewritten"
+    (home / "consent.json").unlink()
+    assert mms_json(home, "status")["config_error"] is None

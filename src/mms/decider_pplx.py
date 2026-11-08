@@ -24,7 +24,7 @@ ABOUT = About(name="pplx-decider-flash-v1.2", reads={"video", "image"}, types=("
               max_px=1_638_400,  # decision_config.json's max_pixels
               questions_per_read=1, picture_s=((230_400, 0.276), (1_638_400, 0.602)), char_s=0.116 / 2000,
               question_keys={"criteria"}, notes="pplx.md", measured={"picture_s", "char_s"},
-              repo="perplexity-ai/pplx-decider-flash-v1.2", repo_gb=9.1)
+              repo="perplexity-ai/pplx-decider-flash-v1.2", commit="9ff7cf9838e59df461c276b7699d56b244d2af58", repo_gb=9.1)
 
 
 class Pplx:

@@ -15,7 +15,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import pytest
-from conftest import MODEL_FOLDERS, ROOT, model_folder, prepared_env, wait_for, write_config
+from conftest import MODEL_FOLDERS, ROOT, fake_torch, model_folder, prepared_env, wait_for, write_config
 from corpus import T0, scan
 from fake_decider import ABOUT as FAKE_ABOUT
 from fake_hub import FakeHub
@@ -98,6 +98,7 @@ class FakeH2o(Fake):
 
 
 REAL_UV_COMMAND = prepare.uv_command  # taken at import, before conftest's `no_real_uv` replaces it for each test
+REAL_CUDA_PROBLEM = modelenv.cuda_problem  # and before the fixture below makes every machine's GPU findable
 
 
 @pytest.fixture(autouse=True)
@@ -106,6 +107,7 @@ def backends(monkeypatch, home):
     monkeypatch.setattr(Fake, "home", home)
     monkeypatch.setattr(Fake, "made", [])
     monkeypatch.setattr(modelenv, "installed", lambda: dict(MMS_ENV))  # d1 is ready unless a test says otherwise
+    monkeypatch.setattr(modelenv, "cuda_problem", lambda backend: None)  # and finds a GPU: no test asks the real machine
 
 
 @pytest.fixture
@@ -705,24 +707,30 @@ def test_prepare_with_the_real_backends_runs_uv_for_the_real_pins_and_not_for_d1
 
 # downloads, with the real backends and the Hub faked
 
+def downloads(name: str, folder: Path) -> list:
+    """The calls a download of a model makes to the Hub: its size at the commit its About pins, then that commit."""
+    about = decider.known(name)[1]
+    return [("info", about.repo, about.commit), ("download", about.repo, folder, about.commit)]
+
+
 def test_use_downloads_a_model_that_is_not_there_into_the_dir_under_its_own_name_and_writes_it(home, real_backends, tmp_path,
                                                                                                hub, capsys):
     fresh = tmp_path / "fresh"  # does not exist yet
     before = configure(home, None)
     assert model(home, "use", "d1-3b", "--dir", str(fresh)) == 0  # any case
-    assert hub.calls == [("info", "LiquidAI/d1-3B"), ("download", "LiquidAI/d1-3B", fresh / "d1-3B", hub.commit)]
+    assert hub.calls == downloads("d1-3B", fresh / "d1-3B")
     assert configuration_model(home) == (fresh / "d1-3B").as_posix(), "the name as the model has it"
     written = (home / "mms.toml").read_text(encoding="utf-8")
     assert written.startswith(before) and tomllib.loads(written)["decider"] == {"model": (fresh / "d1-3B").as_posix()}
     out = capsys.readouterr().out
-    assert out.startswith("downloading LiquidAI/d1-3B at 0000000 (6.3 GB, licence lfm1.0) into ")
+    assert out.startswith(f"downloading LiquidAI/d1-3B at {decider.known('d1-3B')[1].commit[:7]} (6.3 GB, licence lfm1.0) into ")
     assert "model: d1-3B" in out and "d1-3B hears nothing: mms model use d1-Omni-2B gives one that hears" in out
 
 
 def test_use_finishes_a_model_whose_weights_are_not_all_there(home, real, hub):
     (real / "d1-2B" / "model.safetensors").unlink()
     assert model(home, "use", "d1-2B") == 0
-    assert hub.calls == [("info", "LiquidAI/d1-2B"), ("download", "LiquidAI/d1-2B", real / "d1-2B", hub.commit)]
+    assert hub.calls == downloads("d1-2B", real / "d1-2B")
     assert fetch.ready(decider.known("d1-2B")[1], real / "d1-2B") and configuration_model(home) == (real / "d1-2B").as_posix()
 
 
@@ -757,11 +765,11 @@ def test_a_download_leaves_the_floor_of_mms_free_when_the_models_are_on_the_driv
     assert model(home, command, "d1-3B", "--dir", str(fresh)) == 1
     assert ("would leave 18.7 GB free, under [memory] free_gb (20 GB), which pauses capture: free some space or give "
             "another --dir") in capsys.readouterr().err
-    assert hub.calls == [("info", "LiquidAI/d1-3B")] and not fresh.exists()
+    assert hub.calls == downloads("d1-3B", fresh / "d1-3B")[:1] and not fresh.exists()
     assert (home / "mms.toml").read_text(encoding="utf-8") == before
     monkeypatch.setattr(fetch, "same_drive", lambda a, b: False)  # another drive: capture is not paused by what it takes
     assert model(home, command, "d1-3B", "--dir", str(fresh)) == 0
-    assert hub.calls[-1] == ("download", "LiquidAI/d1-3B", fresh / "d1-3B", hub.commit)
+    assert hub.calls[-1] == downloads("d1-3B", fresh / "d1-3B")[1]
 
 
 def test_d1_is_refused_before_any_download_when_mms_own_env_is_not_ready(home, real_backends, tmp_path, hub, monkeypatch, capsys):
@@ -776,11 +784,70 @@ def test_d1_is_refused_before_any_download_when_mms_own_env_is_not_ready(home, r
     assert (home / "mms.toml").read_text(encoding="utf-8") == before
 
 
+def test_d1_is_refused_before_any_download_when_torch_finds_no_cuda_device_and_goes_ahead_when_it_does(
+        home, real_backends, tmp_path, hub, monkeypatch, capsys):
+    """The real check, in a process of mms's interpreter, with a `torch` that says what the machine would."""
+    monkeypatch.setattr(modelenv, "cuda_problem", REAL_CUDA_PROBLEM)
+    fake_torch(tmp_path / "torch-here", monkeypatch, cuda=False)
+    before = configure(home, None)
+    fresh = tmp_path / "fresh"
+    with pytest.raises(ValueError, match=r"d1-3B runs in mms's own env, which is not ready: torch finds no CUDA device: "
+                                         r"the d1 models run on an NVIDIA GPU .*`uv sync --group d1` installs the CUDA build"):
+        model(home, "use", "d1-3B", "--dir", str(fresh))
+    assert model(home, "prepare", "d1-3B", "--dir", str(fresh)) == 1
+    assert "torch finds no CUDA device" in capsys.readouterr().err
+    assert hub.calls == [] and not fresh.exists(), "no network call, nothing made"
+    assert (home / "mms.toml").read_text(encoding="utf-8") == before
+    fake_torch(tmp_path / "torch-here", monkeypatch, cuda=True)  # a GPU
+    assert model(home, "use", "d1-3B", "--dir", str(fresh)) == 0
+    assert hub.calls[-2:] == downloads("d1-3B", fresh / "d1-3B")
+
+
+def test_what_asks_torch_for_a_cuda_device_says_what_went_wrong(tmp_path, monkeypatch):
+    backend = decider_d1.D1
+    fake_torch(tmp_path / "ok", monkeypatch, cuda=True)
+    assert REAL_CUDA_PROBLEM(backend) is None
+    fake_torch(tmp_path / "none", monkeypatch, cuda=False)
+    assert REAL_CUDA_PROBLEM(backend).startswith("torch finds no CUDA device: ")
+    fake_torch(tmp_path / "broken", monkeypatch, broken="DLL load failed while importing _C")
+    problem = REAL_CUDA_PROBLEM(backend)
+    assert problem.startswith("torch cannot be started in mms's own env (exit code 1): ") and "DLL load failed" in problem
+    monkeypatch.setattr(modelenv, "CUDA_CHECK", "import time; time.sleep(30)")
+    monkeypatch.setattr(modelenv, "CUDA_CHECK_S", 0.5)
+    assert "TimeoutExpired" in REAL_CUDA_PROBLEM(backend)
+
+
+def test_listing_models_does_not_start_torch(home, models, tmp_path, monkeypatch, capsys):
+    """`mms model list` only reads: asking whether torch finds a GPU starts a process, and is for what downloads."""
+    monkeypatch.setattr(modelenv, "cuda_problem", lambda backend: pytest.fail("list asked for a CUDA device"))
+    configure(home, models / "d1-Omni-2B")
+    assert model(home) == 0
+    assert "mms's own env" in capsys.readouterr().out
+
+
+def test_a_model_that_is_there_is_switched_to_with_no_question_to_torch_and_one_to_download_is_asked_first(
+        home, real, hub, tmp_path, monkeypatch, capsys):
+    """A PC whose driver has just crashed finds no CUDA device, and still has d1 on disk: `use` and `prepare` are for what is
+    there as they were. Only a download that is due asks."""
+    monkeypatch.setattr(modelenv, "cuda_problem", REAL_CUDA_PROBLEM)
+    fake_torch(tmp_path / "torch-here", monkeypatch, cuda=False)
+    assert model(home, "use", "d1-2B") == 0
+    assert Path(configuration_model(home)) == real / "d1-2B"
+    assert model(home, "prepare", "d1-Omni-2B") == 0 and hub.calls == []
+    (real / "d1-3B" / "model.safetensors").unlink()  # not all there: a download is due
+    before = (home / "mms.toml").read_text(encoding="utf-8")
+    with pytest.raises(ValueError, match=r"d1-3B runs in mms's own env, which is not ready: torch finds no CUDA device"):
+        model(home, "use", "d1-3B")
+    capsys.readouterr()
+    assert model(home, "prepare", "d1-3B") == 1 and "torch finds no CUDA device" in capsys.readouterr().err
+    assert hub.calls == [] and (home / "mms.toml").read_text(encoding="utf-8") == before, "nothing downloaded or written"
+
+
 def test_prepare_downloads_a_model_and_checks_its_env_without_switching(home, real_backends, tmp_path, hub, capsys):
     before = configure(home, None)
     fresh = tmp_path / "fresh"
     assert model(home, "prepare", "d1-3B", "--dir", str(fresh)) == 0
-    assert hub.calls == [("info", "LiquidAI/d1-3B"), ("download", "LiquidAI/d1-3B", fresh / "d1-3B", hub.commit)]
+    assert hub.calls == downloads("d1-3B", fresh / "d1-3B")
     assert "ready: " + ", ".join(f"{name} {version}" for name, version in MMS_ENV.items()) in capsys.readouterr().out
     assert (home / "mms.toml").read_text(encoding="utf-8") == before, "prepare switches nothing"
 
@@ -791,8 +858,7 @@ def test_prepare_downloads_h2o_and_prints_its_commands(home, real_backends, tmp_
     configure(home, None)
     fresh = tmp_path / "fresh"
     assert model(home, "prepare", "h2o-lightning-4b", "--dir", str(fresh)) == 0
-    assert hub.calls == [("info", "h2oai/h2o-lightning-4b"),
-                         ("download", "h2oai/h2o-lightning-4b", fresh / "h2o-lightning-4b", hub.commit)]
+    assert hub.calls == downloads("h2o-lightning-4b", fresh / "h2o-lightning-4b")
     assert H2o.start.format(folder=prepare.wsl(fresh / "h2o-lightning-4b")) in capsys.readouterr().out.splitlines()
 
 
@@ -807,7 +873,7 @@ def test_use_downloads_then_builds_the_env_then_writes_the_model(home, real_back
     (fresh / "envs" / "d3").mkdir(parents=True)  # uv made it, with a python in it
     configure(home, None)
     assert model(home, "use", "D3-EDGE", "--dir", str(fresh)) == 0
-    assert hub.calls == [("info", "vllm-sr/d3-edge"), ("download", "vllm-sr/d3-edge", fresh / "d3-edge", hub.commit)]
+    assert hub.calls == downloads("d3-edge", fresh / "d3-edge")
     assert [c["argv"][:2] for c in calls(log)] == [["pip", "install"]]
     assert configuration_model(home) == (fresh / "d3-edge").as_posix()
     out = capsys.readouterr().out

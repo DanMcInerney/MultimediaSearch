@@ -29,7 +29,8 @@ ABOUT = About(name="d1-Omni-2B", reads=MEDIA_KINDS, files=(), types=TYPES, extra
               questions_per_read=16,  # d1 reads the window again for each 16 questions (d1_set_size)
               picture_s=((230_400, 0.053), (1_638_400, 0.4834)),
               sound_s=0.05, char_s=0.044 / 2000, hit=0.8, notes="d1.md",
-              measured={"picture_s", "sound_s", "char_s", "hit"}, repo="LiquidAI/d1-Omni-2B", repo_gb=4.4, profile={})
+              measured={"picture_s", "sound_s", "char_s", "hit"}, repo="LiquidAI/d1-Omni-2B",
+              commit="c8d48c08dada0191c6b362820f055cfb49c99426", repo_gb=4.4, profile={})
 # d1-2B has d1-Omni-2B's config keys and no audio tower. Measured (tests/test_gpu.py, 1 Nov, through the worker, the
 # median of 5 warm calls with one yes/no question): a 640x360 picture 53 ms, a 1080p one 487 ms, 2,000 characters 47 ms.
 # Its hit is assumed to be d1-Omni-2B's (its calibration temperature is 1.34, so 0.8 is not the same gap there).
@@ -37,7 +38,7 @@ ABOUT_2B = About(name="d1-2B", reads={"video", "image"}, files=(), types=TYPES, 
                  speech=False, max_px=1_638_400, questions_per_read=16,
                  picture_s=((230_400, 0.053), (1_638_400, 0.487)),
                  sound_s=0.05, char_s=0.047 / 2000, hit=0.8, notes="d1.md", measured={"picture_s", "char_s"},
-                 repo="LiquidAI/d1-2B", repo_gb=3.9, profile={})
+                 repo="LiquidAI/d1-2B", commit="10e7671d44e4b37700020b1eed3f594c5f2af0b4", repo_gb=3.9, profile={})
 VARIANTS = {"lfm3_omni": ABOUT, "lfm3_vl": ABOUT_2B}  # config.json model_type -> the model's facts
 
 

@@ -255,8 +255,9 @@ A check-in returns `job`, `state` and `progress`, plus any field that changed si
 ## Consent
 
 Screen, microphone, camera and command sources record nothing until the owner approves them. `source_set` returns
-`needs_approval` with the command `mms approve <name>`. Tell the owner to run it in a terminal. Never run it
-yourself, in a pseudo-terminal or otherwise, and never edit `consent.json`.
+`needs_approval` with an `approve` command. Pass on exactly that command to the owner, to run in a terminal: `mms` is on no
+PATH, so a bare `mms approve <name>` will not run. Never run it yourself, in a pseudo-terminal or otherwise, and never edit
+`consent.json`.
 
 `source_set` needs a cap (`max_gb`) and changes only the fields you give. A cap or `max_days` can only stay the same or
 rise: lowering one is refused (`would_delete`), and the owner lowers it by editing `mms.toml`. The reply says

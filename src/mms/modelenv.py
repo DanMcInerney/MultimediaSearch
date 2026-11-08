@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,9 @@ from pathlib import Path
 from mms.worker.serve import canonical, installed
 
 MARKER = "mms-env.json"  # in a prepared env: {"family", "requirements", "versions", "prepared"}
+NO_CUDA = 3  # what the check below exits with when torch loads and finds no CUDA device
+CUDA_CHECK = f"import sys, torch; sys.exit(0 if torch.cuda.is_available() else {NO_CUDA})"
+CUDA_CHECK_S = 120.0  # importing torch takes a while the first time
 
 
 def base(envs: str | None, models_dir: Path) -> Path:
@@ -35,6 +39,11 @@ def mms_python() -> Path:
     """The interpreter mms runs in. The detached daemon runs under pythonw, which has no console for a worker's pipes."""
     exe = Path(sys.executable)
     return exe.with_name("python.exe") if exe.name.lower() == "pythonw.exe" else exe
+
+
+def mms_script() -> Path:
+    """The `mms` script beside the interpreter (the project's venv), where it is: `mms` is on no PATH. Not checked to exist."""
+    return mms_python().with_name("mms.exe" if os.name == "nt" else "mms")
 
 
 def marker_problem(env: Path, requirements: tuple[str, ...]) -> str | None:
@@ -104,14 +113,34 @@ def own_versions(backend) -> dict:
     return compare(backend.requirements, installed())[0]
 
 
-def problem(backend, model_folder: Path, envs: str | None) -> str | None:
+def cuda_problem(backend) -> str | None:
+    """Why torch in mms's own env cannot run a model on CUDA, or None when it finds a device. A process of mms's interpreter
+    asks (the daemon and the CLI never import torch), which takes seconds."""
+    try:
+        done = subprocess.run([str(mms_python()), "-c", CUDA_CHECK], capture_output=True, text=True, encoding="utf-8",
+                              errors="replace", stdin=subprocess.DEVNULL, timeout=CUDA_CHECK_S)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return f"torch could not be asked for a CUDA device: {type(error).__name__}: {error}"
+    if done.returncode == 0:
+        return None
+    if done.returncode == NO_CUDA:
+        return ("torch finds no CUDA device: the d1 models run on an NVIDIA GPU with a driver that PyTorch's CUDA 12.8 build "
+                f"can use. Install the driver or use a PC that has one; `{backend.install}` installs the CUDA build")
+    tail = "\n".join((done.stderr.strip() or done.stdout.strip()).splitlines()[-4:])
+    return f"torch cannot be started in mms's own env (exit code {done.returncode}): {tail}"
+
+
+def problem(backend, model_folder: Path, envs: str | None, *, cuda: bool = False) -> str | None:
     """Why a backend's env cannot be used yet, or None when it can (or it needs none). mms's own env is read from the
-    installed metadata, so torch is not imported."""
+    installed metadata, so torch is not imported, unless `cuda` asks too whether torch finds a CUDA device (a process starts,
+    so only what is about to download a model asks)."""
     if backend.served:
         return None
     if backend.in_mms_env:
         wrong = compare(backend.requirements, installed())[1]
-        return "; ".join(wrong) + f": run `{backend.install}` in mms's project" if wrong else None
+        if wrong:
+            return "; ".join(wrong) + f": run `{backend.install}` in mms's project"
+        return cuda_problem(backend) if cuda else None
     return marker_problem(folder(envs, model_folder, backend.family), backend.requirements)
 
 

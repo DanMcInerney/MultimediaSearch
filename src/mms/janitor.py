@@ -17,8 +17,8 @@ from mms.store import GB, Store
 
 RESUME_GB = 1  # capture resumes this far above the floor
 DAY_S = 86400.0
-STRAY_S = 3600.0  # a `.part`, `.ffconcat` or `.err` file this old is what a crash left, not a copy or an encode under way
-STRAY_SUFFIXES = (".part", ".ffconcat", ".err")
+STRAY_S = 3600.0  # a stray file this old is what a crash left, not a copy or an encode under way
+STRAY_SUFFIXES = (".part", ".ffconcat", ".err")  # in `streams/` and `spool/`, whose names are all mms's own
 STRAY_FOLDERS = ("streams", "files", "spool")
 LOG_MAX_BYTES = 10_000_000  # daemon.log is cut here: one older file is kept, daemon.log.1
 THIN_GRACE_S = 60.0  # added to an item's age when thinning, so the newest minute stays at full rate
@@ -26,6 +26,14 @@ THIN_GRACE_S = 60.0  # added to an item's age when thinning, so the newest minut
 
 def _noop(_: str) -> None:
     pass
+
+
+def is_stray(folder: str, entry) -> bool:
+    """Whether a file under `folder` of the home is what a crash left. Under `files/` a name ends with the owner's own file's
+    name, so only the writer's partial copy, `.<pid>-<thread>-<name>.part`, counts; elsewhere a suffix is enough."""
+    if folder == "files":
+        return entry.name.startswith(".") and entry.suffix == ".part"
+    return entry.suffix in STRAY_SUFFIXES
 
 
 def crowded(rows: list[tuple], newest: float, over: int) -> list[int]:
@@ -190,7 +198,7 @@ class Janitor:
         for name in STRAY_FOLDERS:
             if (home / name).is_dir():
                 stuck += sum(1 for entry in (home / name).rglob("*")
-                             if entry.suffix in STRAY_SUFFIXES and self._remove_if_older(entry, now, STRAY_S))
+                             if is_stray(name, entry) and self._remove_if_older(entry, now, STRAY_S))
         if stuck:
             self.log(f"janitor: {stuck} old files in use, tried again next pass")
         log = home / "daemon.log"

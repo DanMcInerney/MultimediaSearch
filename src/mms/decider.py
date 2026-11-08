@@ -25,6 +25,7 @@ MEDIA_KINDS = frozenset({"video", "image", "audio"})  # window kinds besides tex
 WINDOW_KINDS = MEDIA_KINDS | {"text", "records", "file"}
 QUESTION_KEYS = ("criteria", "multiple", "range", "step", "unit")  # what a question may carry besides type, instructions, hit
 REPO = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*$")  # a Hugging Face repo, owner/name
+COMMIT = re.compile(r"^[0-9a-f]{40}$")  # a commit of such a repo, in full
 MEASURABLE = ("picture_s", "sound_s", "char_s", "file_s", "hit")  # the About facts that are timed or tried on the developer's laptop
 BACKENDS = ("mms.decider_d1:D1", "mms.decider_d1_3b:D1_3B", "mms.decider_d3:D3",
             "mms.decider_pplx:Pplx", "mms.decider_h2o:H2o")  # folder backends, tried in order: the first whose
@@ -53,6 +54,7 @@ class About:
     question_keys: frozenset = frozenset(QUESTION_KEYS)  # the keys a question may carry besides type and instructions
     notes: str = ""  # a file name in skills/mms-questions/models/, or "" for none
     repo: str = ""  # the Hugging Face repo (owner/name) its folder is downloaded from; empty for none
+    commit: str = ""  # the commit of `repo` that is downloaded, and whose own code runs (40 hex digits); empty with no repo
     repo_gb: float = 0.0  # the repo's size in GB, for `mms model list` to show before a download
     measured: frozenset = frozenset()  # which of MEASURABLE were measured on the developer's laptop; the rest are assumed
     profile: Mapping = field(default_factory=dict)  # overrides of reader.PROFILE (the reader checks the keys); kept read-only
@@ -103,6 +105,10 @@ class About:
             raise ValueError(f"About.notes is a plain file name, or empty for none, not {self.notes!r}")
         if not isinstance(self.repo, str) or (self.repo and not REPO.fullmatch(self.repo)):
             raise ValueError(f"About.repo is a Hugging Face repo, owner/name, or empty for none, not {self.repo!r}")
+        if not isinstance(self.commit, str) or bool(self.commit) != bool(self.repo) or (
+                self.commit and not COMMIT.fullmatch(self.commit)):
+            raise ValueError("About.commit is the 40 hex digits of the commit of About.repo that is downloaded, and empty "
+                             f"when there is no repo, not {self.commit!r}")
         put("measured", frozenset(listed("measured", self.measured, MEASURABLE)))
         points = [tuple(point) if isinstance(point, (list, tuple)) else point for point in listed("picture_s", self.picture_s)]
         if (not points or any(not isinstance(p, tuple) or len(p) != 2

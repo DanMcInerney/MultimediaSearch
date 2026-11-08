@@ -442,6 +442,27 @@ def test_the_stray_files_a_crash_left_go_by_a_rule_and_a_copy_under_way_stays(ho
     assert all(file.exists() for file in kept), "only the three suffixes are strays, however old the file"
 
 
+def test_a_stored_file_is_not_taken_for_a_stray_by_its_name_alone(home, store, daemon):
+    """A stored name ends with the owner's own file's name, which may end `.part`, `.err` or `.ffconcat`: under `files/` only the
+    writer's own dot-prefixed `.part` is a stray, and a stored file goes by its source's caps and ages, with its row."""
+    config(home, source("agent"))
+    long_ago = time.time() - 7200
+    folder = home / "files" / "agent"
+    folder.mkdir(parents=True)
+    stored = [folder / f"20261101T000000Z-0123abcd-{name}" for name in ("download.part", "build.err", "concat.ffconcat")]
+    stray = folder / ".5-6-download.part"
+    dotted = folder / ".5-6-build.err"  # the writer never makes this one
+    for file in (*stored, stray, dotted):
+        file.write_bytes(b"x")
+        os.utime(file, (long_ago, long_ago))
+    for file in stored:
+        store.add_item("agent", "file", long_ago, None, store.relative(file), 1, name=file.name.split("-", 2)[2])
+    daemon()
+    wait_for(lambda: not stray.exists(), what="the writer's partial copy to go")
+    assert all(file.exists() for file in (*stored, dotted)), "only a dot-prefixed .part is a stray under files/"
+    assert len(store.items_of("agent")) == 3 and all((home / item.path).exists() for item in store.items_of("agent"))
+
+
 def test_a_label_goes_with_its_item_and_a_label_of_no_item_stays(home, store, daemon):
     config(home, source("cam", "max_gb = 0.000004"))  # 4 kB
     ids = fill(store, "cam", 10, size=1000, end=time.time() - 100, step=60)
